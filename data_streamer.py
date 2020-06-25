@@ -1,0 +1,100 @@
+#!/usr/bin/env python
+
+# import nidaqmx as daq
+import time
+import warnings
+import math
+import numpy as np
+import pyfirmata
+
+class streamer(object):
+    """
+    encapsulates the various ways to stream data.
+
+    Holds the function that loops forever at a locked rate to stream data at a precise Hz
+    """
+    def __init__(self, daq_name=None):
+        """
+        Doesn't really do anything right now
+        """
+    # def __init__(self, daq_name=None, usb_port='/dev/cu.usbserial-DA011ECL'):
+        
+        # Code for when nidaqmx is used eventually
+        self.daq_name = daq_name
+
+        # if daq_name:
+        #     self.daqtask=daq.Task(daq_name)
+        # else:
+        #     self.daqtask = None
+
+    def arduino_stream(self, callback, stream_rate=1000, usb_port='/dev/cu.usbserial-DA011ECL'):
+        """
+        Connects to the arduino at usb port usb_port, then streams at stream rate samples / second
+
+        Calls callback 'callback' function with [data_L, data_R, current_time] each tick. 
+        Has inbuilt logic to delay to maintain stream_rate
+
+        Blocking; blocks forever. Use quit() to get out. This sometimes errors as it exits
+        """
+        period = 1.0/stream_rate
+
+        board = pyfirmata.Arduino(usb_port)
+        # board = pyfirmata.Arduino('/dev/ttyACM0')
+        it = pyfirmata.util.Iterator(board)
+        it.start()
+
+        analog_input_L = board.get_pin('a:2:i')
+        analog_input_R = board.get_pin('a:3:i')
+
+        print("Waiting for Arduino to initialize")
+        while analog_input_L.read() == None:
+            continue
+        print("Successfully connected to Arduino")
+
+        t = time.perf_counter()
+
+        while True:
+            t+=period
+
+            l_signal, r_signal = analog_input_L.read(), analog_input_R.read()
+
+            callback([l_signal, r_signal, time.perf_counter()])
+
+            try:
+                time.sleep(t-time.perf_counter())
+            except:
+                warnings.warn('System may not be able to handle such high frame rate, lower the desired frequency or simplify your callback fucntion')
+                continue
+
+
+
+    def fake_stream(self, callback, stream_rate=1000):
+        """
+        Generates false data at rate (stream_rate / second)
+
+        Blocking; blocks forever. Use quit() to get out. This sometimes errors as it exits.
+
+        Calls callback 'callback' function with [data_L, data_R, current_time] each tick. 
+        Has inbuilt logic to delay to maintain stream_rate
+
+        Edit this method to get simular or different signals
+        """
+        period = 1.0/stream_rate
+        print(f"Period={period}")
+
+        t = time.perf_counter()
+        i = 0
+        while True:
+            t += period
+            i += period
+
+            raw_signal = abs(math.sin(4*i + math.pi/2))
+
+            callback([raw_signal, raw_signal, time.perf_counter()])
+        
+            try:
+                time.sleep(t-time.perf_counter())
+            except:
+                # t = time.perf_counter()
+                warnings.warn('System may not be able to handle such high frame rate, lower the desired frequency or simplify your callback fucntion')
+                continue

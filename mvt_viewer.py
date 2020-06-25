@@ -1,0 +1,151 @@
+import pygame
+import time
+
+class rectangle(object):
+    def __init__(self, l_x, r_x, height, thickness, window_height=600):
+        self.l_x = l_x
+
+        self.r_x = r_x
+
+        self.height = height
+        self.window_height = window_height
+        self.thickness = thickness
+
+        self.rect_color = (255,0,0)
+
+        
+
+    def draw(self, surface):
+        pygame.draw.polygon(surface, self.rect_color, [(self.l_x, self.height),
+                                                       (self.r_x, self.height),
+                                                       (self.r_x, self.height + self.thickness),
+                                                       (self.l_x, self.height + self.thickness)])
+
+class mvt_viewer(object):
+    def __init__(self, height, width, surface, scale_min=None, scale_max=None, fps=25):
+        """
+        :param height: Height of pygame window
+        :param width: Width of pygame window
+        :param surface: pygame surface to modify when called upon
+        :param scale_min: minimum value of range of data values 
+        :param scale_max: maximum value of range of data values 
+        :param fps: approxmate frames per second
+        """
+        self.height = height
+        self.width = width
+        self.cache = []
+
+        self.rectangle = None
+
+        self.prev_time = time.time()
+        self.frame_time = 1.0/fps
+
+        if scale_max:
+            self.scale_max = scale_max
+        else:
+            self.scale_max = height
+
+        if scale_min:
+            self.scale_min = scale_min
+        else:
+            self.scale_min = 0
+
+        self.running = True
+        # pygame.init()
+        eighth = self.width // 8
+        self.rectangle = rectangle(eighth, self.width -  eighth, 20, 50, height)
+
+        self.screen = surface
+
+        # To be used in mode selection
+        self.internal_mode = "DISPLAY_MVT"
+
+    # Just clears the screen 
+    def blank_screen(self):
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                self.running = False
+                return ("EXIT")
+
+        self.screen.fill((255,255,255))
+
+        self.rectangle.draw(self.screen)
+
+        pygame.display.update()
+        return True
+
+    def transform(self,value):
+        """
+        Internal method
+        Does the range mapping to generate the actual y cordinate of the rectangle
+        
+        :param value: The raw datapoint to be mapped into a y coordinate
+        :return: the transformed value
+        """
+        temp = self.height * (value / (self.scale_max-self.scale_min))
+        return self.height - temp
+
+    def one_step(self):
+        """
+        Does one drawing step for pygame
+        Also handles pygame events; returns False if the pygame window should be exited
+
+        :return: if the program should be quit/ exited
+        """
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                self.running = False
+                return ("EXIT")
+
+        self.screen.fill((255,255,255))
+
+        self.rectangle.draw(self.screen)
+
+        pygame.display.update()
+        return self.running
+   
+    def run(self):
+        """
+        testing function
+
+        is not used in production
+        """
+        while self.running:
+            self.one_step()
+
+    def process_data(self, data, continue_run=True):
+        """
+        the step that does it all! 
+        Takes in a single datapoint, adds it to it's internal cache
+        If its internal FPS counter indicates so, it sets the rectangle's height,
+        and processes a new frame
+
+        :param data: Single numerical datapoint to be correlated with the scale_min/ scale_max
+        that results in the adjusting of the height. Will be added to internal buffer for eventual
+        MVT calculation 
+        """
+        self.cache.append(data)
+        self.running = continue_run
+
+        if time.time() - self.prev_time > self.frame_time:
+            self.rectangle.height = self.transform(data)
+
+            self.prev_time = time.time()
+
+            return self.one_step()
+        else:
+            return True
+
+    def clear_cache(self):
+        """
+        Clears the data cache
+        """
+        self.cache.clear()
+
+    def get_max_value(self):
+        """
+        Returns the maximum value from the internal cache.
+        """
+        return max(self.cache)
+
+
