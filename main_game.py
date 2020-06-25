@@ -10,6 +10,21 @@ import pymunk.pygame_util
 
 import time
 
+class ball:
+    def __init__(self, position, space, radius):
+        self.mass = 30
+
+        self.moment = pymunk.moment_for_circle(self.mass, 0, radius)
+
+        self.body = pymunk.Body(self.mass, self.moment, pymunk.Body.DYNAMIC)
+        self.body.position = pymunk.Vec2d(*position)
+        self.shape = pymunk.Circle(self.body, radius)
+        self.shape.elasticity = 0.1
+        self.shape.friction = 10
+
+        space.add(self.shape, self.body)
+
+
 class paddle:
     def __init__(self, position, space, paddle_radius=19):
         self.mass = 1000.0
@@ -81,11 +96,13 @@ class game(object):
         fourth = width/4
 
         # Create the left paddle
-        self.left_paddle = paddle((fourth, 500), self.space)
+        self.left_paddle = paddle((fourth, 200), self.space)
 
-        self.right_paddle = paddle((fourth*3, 500), self.space)
+        self.right_paddle = paddle((fourth*3, 200), self.space)
 
         self.box = box(self.space, (fourth*2, 500), self.width*.9, 30)
+
+        self.ball = ball((fourth*2, 550), self.space, 10)
 
         self.draw_options = pymunk.pygame_util.DrawOptions(screen)
         # disable the build in debug draw of collision point since we use our own code.
