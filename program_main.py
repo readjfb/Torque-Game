@@ -23,29 +23,39 @@ def handler_exit():
 
 def handler_dev_mode():
 	global clearer, program_mode
+	return_val = clearer.run()
 
-	continue_mode = clearer.run()
-
-	if continue_mode == False: program_mode = "EXIT"
+	if return_val == False: program_mode = "EXIT"
 
 def handler_mvt_L():
 	global mvt, program_mode, last_data
-	continue_mode = mvt.process_data(last_data[0])
+	return_val = mvt.process_data(last_data[0])
 			
-	if continue_mode == "EXIT": program_mode = "EXIT"
+	if return_val == "EXIT": program_mode = "EXIT"
+
+	if str(type(return_val)) == "<class 'str'>" and "SAVE" in return_val:
+		return_val = return_val.split(",")
+		saved_MVT_L = float(return_val[1])
+		
+		saver.save_data(program_mode)
 
 def handler_mvt_R():
 	global mvt, program_mode, last_data
-	continue_mode = mvt.process_data(last_data[1])
+	return_val = mvt.process_data(last_data[1])
 			
-	if continue_mode == "EXIT": program_mode = "EXIT"
+	if return_val == "EXIT": program_mode = "EXIT"
+
+	if str(type(return_val)) == "<class 'str'>" and "SAVE" in return_val:
+		return_val = return_val.split(",")
+		saved_MVT_R = float(return_val[1])
+
+		saver.save_data(program_mode)
 
 def handler_main_game():
 	global program_mode, main_game
-
-	continue_mode = main_game.update_tick(last_data[0], last_data[1])
+	return_val = main_game.update_tick(last_data[0], last_data[1])
 	
-	if continue_mode == False: program_mode = "EXIT"
+	if return_val == False: program_mode = "EXIT"
 
 def handler_calibrate():
 	global program_mode
@@ -86,6 +96,10 @@ def main_handler():
 				saver.save_data(program_mode)
 			elif msg[1] == "CLEAR":
 				saver.clear()
+
+			elif msg[1] == "START":
+				if "MVT" in program_mode:
+					mvt.begin_automation()
 
 	# Parse data commands (There may be many, but loop through and save all of them to ensure that we don't lose any)
 	while data_conn.poll():

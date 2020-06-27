@@ -29,7 +29,7 @@ if __name__ == '__main__':
 	print("sending data")
 
 	# uncomment the type of stream desired
-	stream.arduino_stream(cast_data, 1000, usb_port='/dev/cu.usbserial-DA011ECL')
-	# stream.fake_stream(cast_data, 1000)
+	# stream.arduino_stream(cast_data, 1000, usb_port='/dev/cu.usbserial-DA011ECL')
+	stream.fake_stream(cast_data, 1000)
 
 	conn.close()

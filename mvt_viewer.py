@@ -11,12 +11,10 @@ class rectangle(object):
         self.window_height = window_height
         self.thickness = thickness
 
-        self.rect_color = (255,0,0)
-
         
 
-    def draw(self, surface):
-        pygame.draw.polygon(surface, self.rect_color, [(self.l_x, self.height),
+    def draw(self, surface, color=(255,0,0)):
+        pygame.draw.polygon(surface, color, [(self.l_x, self.height),
                                                        (self.r_x, self.height),
                                                        (self.r_x, self.height + self.thickness),
                                                        (self.l_x, self.height + self.thickness)])
@@ -57,7 +55,25 @@ class mvt_viewer(object):
 
         self.screen = surface
 
-        # To be used in mode selection
+        '''To be used in mode selection
+        
+        CLEAR displays a white screen 
+
+        DISPLAY_MVT just does the regular displaying indefinitely
+
+
+        automation_start()
+        DISPLAY_MVT_0 does regular display for certain seconds before playing sound
+        
+        DISPLAY_MVT_1 collects data for X seconds
+
+        DISPLAY_MVT_2 waits until average isn't increasing anymore
+
+        "Relax"
+
+        Set back to DISPLAY_MVT or CLEAR
+        '''
+        self.refrence_time = time.time()
         self.internal_mode = "DISPLAY_MVT"
 
     # Just clears the screen 
@@ -68,8 +84,6 @@ class mvt_viewer(object):
                 return ("EXIT")
 
         self.screen.fill((255,255,255))
-
-        self.rectangle.draw(self.screen)
 
         pygame.display.update()
         return True
@@ -85,7 +99,74 @@ class mvt_viewer(object):
         temp = self.height * (value / (self.scale_max-self.scale_min))
         return self.height - temp
 
-    def one_step(self):
+    def mode_process(self):
+        time_0, time_1 = 1, 5
+
+        default = "DISPLAY_MVT"
+
+        '''To be used in mode selection
+        
+        CLEAR displays a white screen 
+
+        DISPLAY_MVT just does the regular displaying indefinitely
+
+
+        automation_start()
+        DISPLAY_MVT_0 does regular display for certain seconds before playing sound
+        play sound cue
+
+        DISPLAY_MVT_1 collects data for X seconds
+
+        DISPLAY_MVT_2 waits until average isn't increasing anymore
+
+        "Relax"
+
+        DISPLAY_MVT_3 triggers saving
+
+        Set back to DISPLAY_MVT or CLEAR
+        '''
+        if self.internal_mode == "CLEAR":
+            return self.blank_screen
+        
+        elif self.internal_mode == "DISPLAY_MVT":
+            return self.one_step((200, 200, 200))
+        
+        elif self.internal_mode == "DISPLAY_MVT_0":
+            if time.time() - self.refrence_time > time_0:
+                # [Say] pull HARD
+                self.internal_mode = "DISPLAY_MVT_1"
+                self.refrence_time = time.time()
+
+            return self.one_step()
+        
+        elif self.internal_mode == "DISPLAY_MVT_1":
+            if time.time() - self.refrence_time > time_1: 
+                # [Say] pull hard!
+                self.refrence_time = time.time()
+                self.internal_mode = "DISPLAY_MVT_2"
+
+            return self.one_step()
+
+        elif self.internal_mode == "DISPLAY_MVT_2":
+            # TODO: Logic
+                # [Say] relax!
+                # self.internal_mode = default
+            self.refrence_time = time.time()
+            self.internal_mode = "DISPLAY_MVT_3"
+            return self.one_step()
+
+        elif self.internal_mode == "DISPLAY_MVT_3":
+            self.internal_mode = default
+            return (f"SAVE,{self.get_max_value()}")
+
+        else:
+            return self.one_step()
+
+    def begin_automation(self):
+        self.refrence_time = time.time()
+        self.internal_mode = "DISPLAY_MVT_0"
+
+    def one_step(self, color=(255,0,0)):
         """
         Does one drawing step for pygame
         Also handles pygame events; returns False if the pygame window should be exited
@@ -99,7 +180,7 @@ class mvt_viewer(object):
 
         self.screen.fill((255,255,255))
 
-        self.rectangle.draw(self.screen)
+        self.rectangle.draw(self.screen, color)
 
         pygame.display.update()
         return self.running
@@ -132,7 +213,8 @@ class mvt_viewer(object):
 
             self.prev_time = time.time()
 
-            return self.one_step()
+            # return self.one_step()
+            return self.mode_process()
         else:
             return True
 
