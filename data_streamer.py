@@ -35,6 +35,9 @@ class streamer(object):
         Has inbuilt logic to delay to maintain stream_rate
 
         Blocking; blocks forever. Use quit() to get out. This sometimes errors as it exits
+
+        Note: You have to flash firmata onto the arduino. I flashed the full version
+        see here for details https://www.instructables.com/id/Arduino-Installing-Standard-Firmata/
         """
         period = 1.0/stream_rate
 
@@ -80,7 +83,6 @@ class streamer(object):
         Edit this method to get simular or different signals
         """
         period = 1.0/stream_rate
-        print(f"Period={period}")
 
         t = time.perf_counter()
         i = 0
@@ -95,6 +97,5 @@ class streamer(object):
             try:
                 time.sleep(t-time.perf_counter())
             except:
-                # t = time.perf_counter()
                 warnings.warn('System may not be able to handle such high frame rate, lower the desired frequency or simplify your callback fucntion')
                 continue

@@ -24,6 +24,10 @@ class remote:
 			conn.send(("CMD", "SAVE"))
 			conn.send(("CMD", "CLEAR"))
 
+		def send_start():
+			conn.send(("CMD", "CLEAR"))
+			conn.send(("CMD", "START"))
+
 		def mode_select_command_parser(text):
 			if self.save_change:
 				send_save()
@@ -42,6 +46,8 @@ class remote:
 		combo = Combo(app, options=program_modes, command=mode_select_command_parser, grid=[1, 1], align="top")
 		
 		save_button = PushButton(app, command=send_save, text="Save Data", grid=[0,2], align="top")
+
+		start_button = PushButton(app, command=send_start, text="Start Mode", grid=[0,3], align="top")
 
 		save_on_change_checkbox = CheckBox(app, text="Save on change", command=toggle_save_change, grid=[1,2])
 		save_on_change_checkbox.value = 0
