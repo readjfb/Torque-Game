@@ -16,7 +16,12 @@ sending multiple types of message
 """
 def cast_data(data):
 	# print(data[2])
-	conn.send(("DATA", data))
+	try:
+		conn.send(("DATA", data))
+	except BrokenPipeError: 
+		# Pipe is one way, so there's an error when the main program is
+		# terminated, and the pipe is cut. Therefore quit
+		quit()
 
 
 if __name__ == '__main__':
