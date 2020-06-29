@@ -37,6 +37,7 @@ If a wrong combination of Python version + TKinter + OS is used, the computer ma
 - [ ] Finish calibration system + implementation into the program controller
 - [X] Add start button/ system for automation
 - [X] Add automated system for MVT Viewer
-- [ ] Add audio cues for MVT Viewer
+- [X] Add audio cues for MVT Viewer
+- [ ] Add audio cues for main_game
 - [ ] Add automated system for main_game
 - [X] Add schematic of Arduino layout to folder

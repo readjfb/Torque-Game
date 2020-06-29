@@ -22,6 +22,8 @@ class ball:
         self.shape.elasticity = 0.1
         self.shape.friction = 10
 
+        self.shape.color = pygame.color.THECOLORS["red"]
+
         space.add(self.shape, self.body)
 
 
@@ -50,6 +52,8 @@ class box:
         self.shape = pymunk.Poly(self.body, points)
         self.shape.elasticity = 0.0
         self.shape.friction = 20
+
+        self.shape.color = pygame.color.THECOLORS["black"]
 
         space.add(self.body, self.shape)
 
@@ -106,7 +110,7 @@ class game(object):
 
         self.draw_options = pymunk.pygame_util.DrawOptions(screen)
         # disable the build in debug draw of collision point since we use our own code.
-        # draw_options.flags = draw_options.flags ^ pymunk.pygame_util.DrawOptions.DRAW_COLLISION_POINTS 
+
 
     def converted(self, point):
         """
@@ -130,6 +134,14 @@ class game(object):
 
         pygame.display.flip()
 
+    def reset(self):
+        # Untested, still needs to be automated
+        del self.box
+        del self.ball
+
+        self.box = box(self.space, (fourth*2, 500), self.width*.9, 30)
+
+        self.ball = ball((fourth*2, 550), self.space, 10)
 
     def update_tick(self, l_data, r_data):
         """

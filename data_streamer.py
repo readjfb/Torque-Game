@@ -83,7 +83,6 @@ class streamer(object):
         Edit this method to get simular or different signals
         """
         period = 1.0/stream_rate
-        print(f"Period={period}")
 
         t = time.perf_counter()
         i = 0

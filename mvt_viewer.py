@@ -20,7 +20,7 @@ class rectangle(object):
                                                        (self.l_x, self.height + self.thickness)])
 
 class mvt_viewer(object):
-    def __init__(self, height, width, surface, scale_min=None, scale_max=None, fps=25):
+    def __init__(self, height, width, surface, audio_cues, scale_min=None, scale_max=None, fps=25):
         """
         :param height: Height of pygame window
         :param width: Width of pygame window
@@ -29,6 +29,9 @@ class mvt_viewer(object):
         :param scale_max: maximum value of range of data values 
         :param fps: approxmate frames per second
         """
+        
+        self.audio_cues = audio_cues
+
         self.height = height
         self.width = width
         self.cache = []
@@ -100,7 +103,7 @@ class mvt_viewer(object):
         return self.height - temp
 
     def mode_process(self):
-        time_0, time_1 = 1, 5
+        time_0, time_1 = 2, 6
 
         default = "DISPLAY_MVT"
 
@@ -133,15 +136,14 @@ class mvt_viewer(object):
         
         elif self.internal_mode == "DISPLAY_MVT_0":
             if time.time() - self.refrence_time > time_0:
-                # [Say] pull HARD
                 self.internal_mode = "DISPLAY_MVT_1"
                 self.refrence_time = time.time()
+                self.audio_cues['pull hard'].play()
 
             return self.one_step()
         
         elif self.internal_mode == "DISPLAY_MVT_1":
             if time.time() - self.refrence_time > time_1: 
-                # [Say] pull hard!
                 self.refrence_time = time.time()
                 self.internal_mode = "DISPLAY_MVT_2"
 
@@ -149,13 +151,14 @@ class mvt_viewer(object):
 
         elif self.internal_mode == "DISPLAY_MVT_2":
             # TODO: Logic
-                # [Say] relax!
                 # self.internal_mode = default
             self.refrence_time = time.time()
             self.internal_mode = "DISPLAY_MVT_3"
             return self.one_step()
 
         elif self.internal_mode == "DISPLAY_MVT_3":
+            self.audio_cues['relax'].play()
+            
             self.internal_mode = default
             return (f"SAVE,{self.get_max_value()}")
 
@@ -165,6 +168,8 @@ class mvt_viewer(object):
     def begin_automation(self):
         self.refrence_time = time.time()
         self.internal_mode = "DISPLAY_MVT_0"
+        self.audio_cues['starting'].play()
+
 
     def one_step(self, color=(255,0,0)):
         """
