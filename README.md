@@ -34,7 +34,7 @@ If a wrong combination of Python version + TKinter + OS is used, the computer ma
 - [X] Finish pymunk physics in main_game
 - [X] Create bash script to run all of the scripts
 - [X] Finish prototype of main_game
-- [ c ] Finish calibration system + implementation into the program controller
+- [ ] Finish calibration system + implementation into the program controller
 - [X] Add start button/ system for automation
 - [X] Add automated system for MVT Viewer
 - [X] Add audio cues for MVT  
