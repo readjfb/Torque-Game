@@ -34,7 +34,7 @@ def handler_mvt_L():
             
     if return_val == "EXIT": program_mode = "EXIT"
 
-    if str(type(return_val)) == "<class 'str'>" and "SAVE" in return_val:
+    if "SAVE" in return_val:
         return_val = return_val.split(",")
         saved_MVT_L = float(return_val[1])
 
@@ -46,7 +46,7 @@ def handler_mvt_R():
             
     if return_val == "EXIT": program_mode = "EXIT"
 
-    if str(type(return_val)) == "<class 'str'>" and "SAVE" in return_val:
+    if "SAVE" in return_val:
         return_val = return_val.split(",")
         saved_MVT_R = float(return_val[1])
 
