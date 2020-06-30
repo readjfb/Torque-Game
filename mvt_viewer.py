@@ -113,18 +113,17 @@ class mvt_viewer(object):
 
         DISPLAY_MVT just does the regular displaying indefinitely
 
-
         automation_start()
-        DISPLAY_MVT_0 does regular display for certain seconds before playing sound
+        DISPLAY_MVT_0 does regular display for time_0 seconds before playing sound
         play sound cue
 
-        DISPLAY_MVT_1 collects data for X seconds
+        DISPLAY_MVT_1 collects data for tine_1 seconds
 
         DISPLAY_MVT_2 waits until average isn't increasing anymore
 
-        "Relax"
-
+        
         DISPLAY_MVT_3 triggers saving
+        "Relax"
 
         Set back to DISPLAY_MVT or CLEAR
         '''
@@ -143,7 +142,7 @@ class mvt_viewer(object):
             return self.one_step()
         
         elif self.internal_mode == "DISPLAY_MVT_1":
-            if time.time() - self.refrence_time > time_1: 
+            if time.time() - self.refrence_time > time_1:
                 self.refrence_time = time.time()
                 self.internal_mode = "DISPLAY_MVT_2"
 
@@ -165,7 +164,14 @@ class mvt_viewer(object):
         else:
             return self.one_step()
 
+
     def begin_automation(self):
+        """
+        sets the starting refrence time for the MVT collection system
+        Also sets the internal mode, and plays the "Start cue"
+        
+        :return: Nothing
+        """
         self.refrence_time = time.time()
         self.internal_mode = "DISPLAY_MVT_0"
         self.audio_cues['starting'].play()
@@ -188,7 +194,7 @@ class mvt_viewer(object):
         self.rectangle.draw(self.screen, color)
 
         pygame.display.update()
-        return self.running
+        return str(self.running)
    
     def run(self):
         """
@@ -218,10 +224,9 @@ class mvt_viewer(object):
 
             self.prev_time = time.time()
 
-            # return self.one_step()
             return self.mode_process()
         else:
-            return True
+            return "True"
 
     def clear_cache(self):
         """
