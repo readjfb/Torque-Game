@@ -15,7 +15,6 @@ potential future enhancements to program that could result in this script
 sending multiple types of message
 """
 def cast_data(data):
-	# print(data[2])
 	try:
 		conn.send(("DATA", data))
 	except BrokenPipeError: 

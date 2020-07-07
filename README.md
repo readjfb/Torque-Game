@@ -34,10 +34,13 @@ If a wrong combination of Python version + TKinter + OS is used, the computer ma
 - [X] Finish pymunk physics in main_game
 - [X] Create bash script to run all of the scripts
 - [X] Finish prototype of main_game
-- [ ] Finish calibration system + implementation into the program controller
+- [X] Finish calibration system + implementation into the program controller
 - [X] Add start button/ system for automation
 - [X] Add automated system for MVT Viewer
 - [X] Add audio cues for MVT  
-- [ ] Add audio cues for main_game
-- [ ] Add automated system for main_game
+- [ ] ~~Add audio cues for main_game~~
+- [ ] ~~Add automated system for main_game~~
 - [X] Add schematic of Arduino layout to folder
+- [X] Create prototype constant error match test system
+- [ ] Prototype stage 4
+- [ ] Add GUI system for manually setting MVT percentage in constant_error_tests
