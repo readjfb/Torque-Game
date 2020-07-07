@@ -73,7 +73,7 @@ class calibrator:
 
     def process_data(self, data):
         '''
-            Takes both datapoints, displays the appropriate screen
+            Takes both data points, displays the appropriate screen
 
             Also handles the program state
         '''

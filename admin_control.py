@@ -40,7 +40,7 @@ class remote:
         def toggle_save_change():
             self.save_change = save_on_change_checkbox.value
 
-        app = App(title="Hey", layout="grid")
+        app = App(title="Torque Game Admin Control", layout="grid")
         result = Text(app, text="Default selection", grid=[1, 0], align="top")
 
         combo = Combo(app, options=program_modes, command=mode_select_command_parser, grid=[1, 1], align="top")
