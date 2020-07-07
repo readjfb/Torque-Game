@@ -18,4 +18,5 @@ class clearer:
 
             pygame.draw.polygon(self.screen, (255,0,0), [(0,0), (1,0), (1,1), (0,1)])
             pygame.display.update()
+            self.prev_time = time.time()
         return True

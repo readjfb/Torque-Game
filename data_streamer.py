@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 
-# import nidaqmx as daq
+import nidaqmx as daq
 import time
 import warnings
 import math
@@ -13,19 +13,13 @@ class streamer(object):
 
     Holds the function that loops forever at a locked rate to stream data at a precise Hz
     """
-    def __init__(self, daq_name=None):
+    def __init__(self):
         """
         Doesn't really do anything right now
         """
-    # def __init__(self, daq_name=None, usb_port='/dev/cu.usbserial-DA011ECL'):
+        return
         
-        # Code for when nidaqmx is used eventually
-        self.daq_name = daq_name
-
-        # if daq_name:
-        #     self.daqtask=daq.Task(daq_name)
-        # else:
-        #     self.daqtask = None
+        
 
     def arduino_stream(self, callback, stream_rate=1000, usb_port='/dev/cu.usbserial-DA011ECL'):
         """
@@ -69,7 +63,17 @@ class streamer(object):
                 warnings.warn('System may not be able to handle such high frame rate, lower the desired frequency or simplify your callback fucntion')
                 continue
 
+    def ni_stream(self, callback, daq_name, channels=["Dev1/ai0","Dev1/ai1"], stream_rate=1000):
+        """
+        Entirely untested! Pretty much straight copied from Ling's code
+        
+        I think that channels should take the form as seen above
+        """
+        daqtask = daq.Task(daq_name)
 
+        for chn in channels:
+            daqtask.ai_channels.add_ai_voltage_chan(chn)
+        daqtask.timing.cfg_samp_clk_timing(stream_rate)
 
     def fake_stream(self, callback, stream_rate=1000):
         """
