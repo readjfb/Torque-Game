@@ -61,7 +61,7 @@ class data_saver(object):
         elif mode == "MAIN_GAME":
             path = self.save_dir + "/game_testing/"
         elif mode == "CONST_ERROR_L":
-            path = self.save_dir + "/const_error_test_l"
+            path = self.save_dir + "/const_error_test_l/"
         elif mode == "CONST_ERROR_R":
             path = self.save_dir + "/const_error_test_r/"
         else:

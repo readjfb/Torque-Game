@@ -137,7 +137,7 @@ def main_handler():
                 saver.save_data(program_mode)
             elif msg[1] == "CLEAR":
                 saver.clear()
-                saver.add_data("raw_torqueL,raw_torqueR,calbrated_torqueL,calbrated_torqueR,MVT_L,MVT_R,Time")
+                saver.add_data("raw_torqueL,raw_torqueR,calibrated_torqueL,calibrated_torqueR,MVT_L,MVT_R,Time")
 
             elif msg[1] == "START":
                 if "MVT" in program_mode:
@@ -155,7 +155,7 @@ def main_handler():
         if msg[0] == "DATA":
             msg = msg[1]
             # Data comes in as TorqueL, TorqueR, Time
-            # Save as raw_torqueL, raw_torqueR, calbrated_torqueL, calbrated_torqueR, MVT_L, MVT_R, Time
+            # Save as raw_torqueL, raw_torqueR, calibrated_torqueL, calibrated_torqueR, MVT_L, MVT_R, Time
             if msg[0] == None or msg[1] == None:
                 continue
 

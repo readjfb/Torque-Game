@@ -68,7 +68,7 @@ class error_test:
         
 
     def process_mode(self, ref_force, ref_max_force, target_perc):
-        time_0, time_1 = 2, 6
+        time_0, time_1, time_2 = 2, 2, 8
 
         current_perc = ref_force/ref_max_force
 
@@ -84,8 +84,8 @@ class error_test:
             self.one_circle_target(ref_force, ref_max_force, target_perc)
         
         elif self.internal_mode == "ERROR_TEST_1":  
-            # Wait until we get to the right height
-            if abs(current_perc - target_perc) < .05:
+            # Wait until we get to the right height and a bit of time has elapsed
+            if abs(current_perc - target_perc) < .05 and time.time()-self.refrence_time > time_1:
                 # We're in a good zone 
                 # TODO: Do checking to make sure we stay here for a bit 
                 self.internal_mode = "ERROR_TEST_2"
@@ -95,7 +95,7 @@ class error_test:
             self.one_circle_target(ref_force, ref_max_force, target_perc)
 
         elif self.internal_mode == "ERROR_TEST_2":
-            if time.time()-self.refrence_time > time_1:
+            if time.time()-self.refrence_time > time_2:
                 self.internal_mode = "ERROR_TEST_3"
                 self.refrence_time = time.time()
 

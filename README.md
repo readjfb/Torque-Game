@@ -43,3 +43,4 @@ If a wrong combination of Python version + TKinter + OS is used, the computer ma
 - [X] Add schematic of Arduino layout to folder
 - [X] Create prototype constant error match test system
 - [ ] Prototype stage 4
+- [ ] Add GUI system for manually setting MVT percentage in constant_error_tests
