@@ -1,25 +1,26 @@
 import pygame
 import time
 
+
 class error_test:
     def __init__(self, screen, audio_cues, fps=30):
         self.screen = screen
         self.audio_cues = audio_cues
 
-        self.width, self.height = pygame.display.get_surface().get_size()
+        self.width, self.height = screen.get_size()
 
-        self.bg_color = (255,255,255)
+        self.bg_color = (255, 255, 255)
 
         self.frame_time = 1.0/fps
         self.prev_time = time.time()
 
-
         '''
             "DEFAULT" - Display blank screen with a static circle
-            
+
             "ERROR_TEST_0": Say "Beginning test", and wait for 2 seconds
 
-            "ERROR_TEST_1": Say Pull in; wait until level reaches ~ desired percentage for X seconds
+            "ERROR_TEST_1": Say Pull in; wait until level reaches
+            ~ desired percentage for X seconds
 
             "ERROR_TEST_2": Say "match", collect data for 6 seconds
 
@@ -29,8 +30,6 @@ class error_test:
         self.internal_mode = "DEFAULT"
         self.in_zone = False
 
-
-
     def display_clear(self):
         # Display the default screen with a circle on it
         self.screen.fill(self.bg_color)
@@ -39,8 +38,8 @@ class error_test:
 
         static_radius = self.width // 3
 
-        pygame.draw.circle(self.screen, (1,1,1), center, static_radius, 12)
-    
+        pygame.draw.circle(self.screen, (1, 1, 1), center, static_radius, 12)
+
         pygame.display.update()
 
     def one_circle_target(self, force, max_force, target_perc):
@@ -50,14 +49,14 @@ class error_test:
 
         static_radius = self.width // 3
 
-        pygame.draw.circle(self.screen, (1,1,1), center, static_radius, 12)
+        pygame.draw.circle(self.screen, (1, 1, 1), center, static_radius, 12)
 
         target_value = max_force * target_perc
 
         variable_rad = (force/target_value) * static_radius
-        variable_rad = max(int(variable_rad), 6) 
+        variable_rad = max(int(variable_rad), 6)
 
-        pygame.draw.circle(self.screen, (255,0,0), center, variable_rad, 6)
+        pygame.draw.circle(self.screen, (255, 0, 0), center, variable_rad, 6)
 
         pygame.display.update()
 
@@ -65,7 +64,6 @@ class error_test:
         self.internal_mode = "ERROR_TEST_0"
         self.refrence_time = time.time()
         self.audio_cues['starting'].play()
-        
 
     def process_mode(self, ref_force, ref_max_force, target_perc):
         time_0, time_1, time_2 = 2, 2, 8
@@ -74,7 +72,7 @@ class error_test:
 
         if self.internal_mode == "DEFAULT":
             self.display_clear()
-        
+
         elif self.internal_mode == "ERROR_TEST_0":
             if time.time()-self.refrence_time > time_0 and current_perc < .1:
                 self.internal_mode = "ERROR_TEST_1"
@@ -82,12 +80,13 @@ class error_test:
                 self.audio_cues['pull to line'].play()
 
             self.one_circle_target(ref_force, ref_max_force, target_perc)
-        
-        elif self.internal_mode == "ERROR_TEST_1":  
-            # Wait until we get to the right height and a bit of time has elapsed
+
+        elif self.internal_mode == "ERROR_TEST_1":
+            # Wait until we get to the right height and a bit of
+            # time has elapsed
             if abs(current_perc - target_perc) < .05 and time.time()-self.refrence_time > time_1:
-                # We're in a good zone 
-                # TODO: Do checking to make sure we stay here for a bit 
+                # We're in a good zone
+                # TODO: Do checking to make sure we stay here for a bit
                 self.internal_mode = "ERROR_TEST_2"
                 self.refrence_time = time.time()
                 self.audio_cues['match forces'].play()
@@ -103,7 +102,7 @@ class error_test:
 
         elif self.internal_mode == "ERROR_TEST_3":
             self.audio_cues['relax'].play()
-            
+
             self.internal_mode = "DEFAULT"
 
             # TBD: Do we want to return something(s) to be saved?
@@ -129,7 +128,6 @@ class error_test:
 
         return "True"
 
-
     def display_circles(self, f_1, max_f_1, f_2, max_f_2):
         self.screen.fill(self.bg_color)
 
@@ -140,9 +138,9 @@ class error_test:
         rad_1 = max(int((f_1/max_f_1) * h), 5)
         rad_2 = max(int((f_2/max_f_2) * h), 5)
 
-        pygame.draw.circle(self.screen, (255,0,0), center, rad_1, 5)
+        pygame.draw.circle(self.screen, (255, 0, 0), center, rad_1, 5)
 
-        pygame.draw.circle(self.screen, (0,0,255), center, rad_2, 5)
+        pygame.draw.circle(self.screen, (0, 0, 255), center, rad_2, 5)
 
         pygame.display.update()
 
@@ -159,6 +157,4 @@ class error_test:
 
             self.prev_time = time.time()
 
-        return "True" 
-
-
+        return "True"

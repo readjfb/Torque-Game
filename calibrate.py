@@ -1,24 +1,25 @@
 '''
-    TBD
+    Calibrates the two data inputs by finding an average according to
+    a specific sequence of timings.
 '''
 import pygame
 import time
 
+
 class calibrator:
-    def __init__(self, screen, sound_effects, width, height, fps=10):
+    def __init__(self, screen, sound_effects, fps=10):
         self.screen = screen
-        self.width = width
-        self.height = height
+        self.width, self.height = screen.get_size()
 
         self.sound_effects = sound_effects
 
         self.saved_values = []
 
         font = pygame.font.Font('freesansbold.ttf', 90)
-        self.text = font.render('Calibrating!', True, (0,0,0), (255,255,255))
+        self.text = font.render('Calibrating!', True, (0, 0, 0), (255, 255, 255))
 
         self.text_rect = self.text.get_rect()
-        self.text_rect.center = (width//2, height//2)
+        self.text_rect.center = (self.width//2, self.height//2)
 
         self.prev_time = time.time()
         self.refrence_time = time.time()
@@ -43,13 +44,12 @@ class calibrator:
 
         if time.time() - self.prev_time > self.frame_time:
             self.screen.fill((255,255,255))
-        
+
             pygame.display.update()
 
             self.prev_time = time.time()
 
         return "True"
-
 
     def display_screen(self):
         # Display the screen with "calibrate" on it
@@ -59,8 +59,8 @@ class calibrator:
                 return "False"
 
         if time.time() - self.prev_time > self.frame_time:
-            self.screen.fill((255,255,255))
-        
+            self.screen.fill((255, 255, 255))
+
             pygame.display.set_caption('Calibration')
 
             self.screen.blit(self.text, self.text_rect)
@@ -92,7 +92,7 @@ class calibrator:
             return self.display_screen()
 
         elif self.internal_mode == "CALIBRATE_1":
-            if time.time() - self.refrence_time > time_0: 
+            if time.time() - self.refrence_time > time_1:
                 self.sound_effects["end calibration"].play()
                 self.internal_mode = "CALIBRATE"
 
@@ -104,5 +104,3 @@ class calibrator:
 
                 return(f"DATA,{mean_l},{mean_r}")
             return "True"
-
-        

@@ -2,24 +2,26 @@ from multiprocessing.connection import Listener
 
 from data_saver import data_saver
 from mvt_viewer import mvt_viewer
-from data_saver import data_saver
 from clear_screen import clearer
 from main_game import game
 from calibrate import calibrator
 from constant_error_test import error_test
 
 import pygame
-from pygame.locals import *
+# from pygame.locals import *
 
 import time
 from time import strftime, localtime
 
+
 program_modes = ["DEV_MODE", "CALIBRATE", "MVT_L", "MVT_R", "CONST_ERROR_L", "CONST_ERROR_R", "MAIN_GAME"]
+
 
 def calibrated(data):
     global calibration_data
 
     return [data[0]-calibration_data[0], data[1]-calibration_data[1]]
+
 
 # Handler methods control what happens each 'tick' in each separate mode
 def handler_exit():
@@ -29,16 +31,18 @@ def handler_exit():
     remote_conn.close()
     quit()
 
+
 def handler_dev_mode():
     global clearer, program_mode
     return_val = clearer.run()
 
     if return_val == False: program_mode = "EXIT"
 
+
 def handler_mvt_L():
     global mvt, program_mode, calibrated_last_data, saved_MVT_L
     return_val = mvt.process_data(calibrated_last_data[0])
-            
+
     if return_val == "EXIT": program_mode = "EXIT"
 
     if "SAVE" in return_val:
@@ -48,10 +52,11 @@ def handler_mvt_L():
         saver.save_data(program_mode)
         saver.clear()
 
+
 def handler_mvt_R():
     global mvt, program_mode, calibrated_last_data, saved_MVT_R
     return_val = mvt.process_data(calibrated_last_data[1])
-            
+
     if return_val == "EXIT": program_mode = "EXIT"
 
     if "SAVE" in return_val:
@@ -61,6 +66,7 @@ def handler_mvt_R():
         saver.save_data(program_mode)
         saver.clear()
 
+
 def handler_const_error_l():
     global program_mode, const_error_test, saved_MVT_L, saved_MVT_R
 
@@ -68,10 +74,10 @@ def handler_const_error_l():
 
     if return_val == "False": program_mode = "EXIT"
 
-    
     if return_val == "SAVE": 
         saver.save_data(program_mode)
         saver.clear()
+
 
 def handler_const_error_r():
     global program_mode, const_error_test, saved_MVT_L, saved_MVT_R
@@ -80,19 +86,22 @@ def handler_const_error_r():
 
     if return_val == "False": program_mode = "EXIT"
 
-    if return_val == "SAVE": 
+    if return_val == "SAVE":
         saver.save_data(program_mode)
         saver.clear()
+
 
 def handler_main_game():
     global program_mode, main_game, calibrated_last_data
     return_val = main_game.update_tick(calibrated_last_data[0], calibrated_last_data[1])
-    
+
     if return_val == False: program_mode = "EXIT"
+
 
 def handler_calibrate():
     global program_mode, calibrator, calibration_data, saver
     return_val = calibrator.process_data(last_data)
+    # Make sure to use the uncalibrated, raw data!
 
     if return_val == "False": program_mode = "EXIT"
 
@@ -110,10 +119,10 @@ def main_handler():
 
     Does the handling of the remote connection, data streams
 
-    Can be considered the 'main loop' of the system 
+    Can be considered the 'main loop' of the system
 
-    Essentially just takes in the data, saves it, then routes the data to whateer visualization system
-    is determined by the program_mode
+    Essentially just takes in the data, saves it, then routes the data to
+    visualization system is determined by the program_mode
     """
     global last_data, calibrated_last_data, remote_conn, data_conn, program_start_time, program_mode, saved_MVT_L, saved_MVT_R
 
@@ -223,10 +232,10 @@ if __name__ == '__main__':
 
     pygame.init()
     if pygame.mixer and not pygame.mixer.get_init():
-        print ('Warning, no sound')
+        print('Warning, no sound')
         pygame.mixer = None
         quit()
-    
+
     width, height = 600, 600
     screen = pygame.display.set_mode((width, height))
 
@@ -251,22 +260,22 @@ if __name__ == '__main__':
     audio_cues['match forces'] = pygame.mixer.Sound('sound_effects/matchForces.wav')
 
     # Create MVT Object, to be used when needed
-    mvt = mvt_viewer(width, height, screen, audio_cues)
+    mvt = mvt_viewer(screen, audio_cues)
     mvt.scale_max = 1.0
 
     # Create clearer object, that just serves to create a blank screen. This is
     # needed, as pygame gets into problems if you don't give it update commands
-    # frequently enough 
+    # frequently enough
     clearer = clearer(screen)
 
-    main_game = game(screen, width, height, 19)
+    main_game = game(screen, 19)
     # These should be set again once automation is setup for the game
     game.max_force = 1
     game.min_force = 0
 
     const_error_test = error_test(screen, audio_cues, 30)
 
-    calibrator = calibrator(screen, audio_cues, width, height)
+    calibrator = calibrator(screen, audio_cues)
 
     # global variables to store data during the test
     saved_MVT_L, saved_MVT_R = 1.0, 1.0
@@ -274,8 +283,8 @@ if __name__ == '__main__':
     # Array containing the calibration matrix
     calibration_data = [0, 0]
 
-    # Global variable to store last data as a buffer, in case there's an issue 
-    # or a break in the data collection 
+    # Global variable to store last data as a buffer, in case there's an issue
+    # or a break in the data collection
     last_data = [0, 0]
     calibrated_last_data = [0.0, 0.0]
 

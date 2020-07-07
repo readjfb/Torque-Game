@@ -26,7 +26,6 @@ class data_saver(object):
             else:
                 print ("Successfully created the directory %s" % path)
 
-    
     def add_data(self, line):
         """
         Add a csv or other line to the cache of data to be saved
@@ -35,7 +34,6 @@ class data_saver(object):
         :return: returns nothing
         """
         self.data_cache.append(line)
-
 
     def clear(self):
         """
@@ -49,8 +47,9 @@ class data_saver(object):
         """
         Command that creates and writes a new file based on the cache
 
-        :param mode: tell the object the mode, which informs the directory to be saved in
-       
+        :param mode: tell the object the mode, which informs the directory to
+        be saved in
+
         :return: returns nothing
         """
 
@@ -77,6 +76,7 @@ class data_saver(object):
 
         print(f"Successfully wrote to file {path}{mode}_data{i}.csv")
         return
+
 
 if __name__ == '__main__':
     save = data_saver("test_test")

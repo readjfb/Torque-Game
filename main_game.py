@@ -1,4 +1,7 @@
-import math, sys, random
+"""
+    Not currently using this class!
+
+"""
 
 import pygame
 from pygame.locals import *
@@ -9,6 +12,7 @@ from pymunk import Vec2d
 import pymunk.pygame_util
 
 import time
+
 
 class ball:
     def __init__(self, position, space, radius):
@@ -59,7 +63,7 @@ class box:
 
 
 class game(object):
-    def __init__(self, screen, width, height, paddle_radius, fps=25):
+    def __init__(self, screen, paddle_radius, fps=25):
         """
         Creates the main tray game
 
@@ -70,8 +74,8 @@ class game(object):
         :param fps: the approximate locked fps of the game
         """
         self.screen = screen
-        self.width = width
-        self.height = height
+        self.width, self.height = screen.get_size()
+
         self.clock = pygame.time.Clock()
 
         self.max_force = 1
@@ -92,12 +96,12 @@ class game(object):
         # Create the floor
         floor_height = 10
         body = pymunk.Body(body_type=pymunk.Body.KINEMATIC)
-        shape = pymunk.Segment(body, [0, floor_height], [width, floor_height], 0.0)
+        shape = pymunk.Segment(body, [0, floor_height], [self.width, floor_height], 0.0)
         shape.friction = 10
         self.space.add(shape)
         self.static_lines.append(shape)
 
-        fourth = width/4
+        fourth = self.width/4
 
         # Create the left paddle
         self.left_paddle = paddle((fourth, 200), self.space)
@@ -109,8 +113,6 @@ class game(object):
         self.ball = ball((fourth*2, 550), self.space, 10)
 
         self.draw_options = pymunk.pygame_util.DrawOptions(screen)
-        # disable the build in debug draw of collision point since we use our own code.
-
 
     def converted(self, point):
         """
@@ -169,4 +171,3 @@ class game(object):
             return self.draw_tick()
         else:
             return True
-
