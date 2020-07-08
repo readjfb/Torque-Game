@@ -4,7 +4,8 @@ from data_saver import data_saver
 from mvt_viewer import mvt_viewer
 from clear_screen import clearer
 from main_game import game
-from calibrate import calibrator
+from bar_test import bar_test
+from zeroer import zeroer
 from constant_error_test import error_test
 
 import pygame
@@ -14,13 +15,13 @@ import time
 from time import strftime, localtime
 
 
-program_modes = ["DEV_MODE", "CALIBRATE", "MVT_L", "MVT_R", "CONST_ERROR_L", "CONST_ERROR_R", "MAIN_GAME"]
+program_modes = ["DEV_MODE", "ZERO", "MVT_L", "MVT_R", "CONST_ERROR_L", "CONST_ERROR_R", "BAR_TEST", "MAIN_GAME"]
 
 
-def calibrated(data):
-    global calibration_data
+def zeroed(data):
+    global zero_data
 
-    return [data[0]-calibration_data[0], data[1]-calibration_data[1]]
+    return [data[0]-zero_data[0], data[1]-zero_data[1]]
 
 
 # Handler methods control what happens each 'tick' in each separate mode
@@ -40,8 +41,8 @@ def handler_dev_mode():
 
 
 def handler_mvt_L():
-    global mvt, program_mode, calibrated_last_data, saved_MVT_L
-    return_val = mvt.process_data(calibrated_last_data[0])
+    global mvt, program_mode, zeroed_last_data, saved_MVT_L
+    return_val = mvt.process_data(zeroed_last_data[0])
 
     if return_val == "EXIT": program_mode = "EXIT"
 
@@ -54,8 +55,8 @@ def handler_mvt_L():
 
 
 def handler_mvt_R():
-    global mvt, program_mode, calibrated_last_data, saved_MVT_R
-    return_val = mvt.process_data(calibrated_last_data[1])
+    global mvt, program_mode, zeroed_last_data, saved_MVT_R
+    return_val = mvt.process_data(zeroed_last_data[1])
 
     if return_val == "EXIT": program_mode = "EXIT"
 
@@ -70,7 +71,7 @@ def handler_mvt_R():
 def handler_const_error_l():
     global program_mode, const_error_test, saved_MVT_L, saved_MVT_R
 
-    return_val = const_error_test.process_data(calibrated_last_data[0], saved_MVT_L, .25, calibrated_last_data[1], saved_MVT_R)
+    return_val = const_error_test.process_data(zeroed_last_data[0], saved_MVT_L, .25, zeroed_last_data[1], saved_MVT_R)
 
     if return_val == "False": program_mode = "EXIT"
 
@@ -82,7 +83,7 @@ def handler_const_error_l():
 def handler_const_error_r():
     global program_mode, const_error_test, saved_MVT_L, saved_MVT_R
 
-    return_val = const_error_test.process_data(calibrated_last_data[1], saved_MVT_R, .25, calibrated_last_data[0], saved_MVT_L)
+    return_val = const_error_test.process_data(zeroed_last_data[1], saved_MVT_R, .25, zeroed_last_data[0], saved_MVT_L)
 
     if return_val == "False": program_mode = "EXIT"
 
@@ -92,23 +93,29 @@ def handler_const_error_r():
 
 
 def handler_main_game():
-    global program_mode, main_game, calibrated_last_data
-    return_val = main_game.update_tick(calibrated_last_data[0], calibrated_last_data[1])
+    global program_mode, main_game, zeroed_last_data
+    return_val = main_game.update_tick(zeroed_last_data[0], zeroed_last_data[1])
+
+    if return_val == False: program_mode = "EXIT"
+
+def handler_bar_test():
+    global program_mode, main_game, zeroed_last_data
+    return_val = bar_test.process_data(zeroed_last_data[0], zeroed_last_data[1], saved_MVT_L, saved_MVT_R)
 
     if return_val == False: program_mode = "EXIT"
 
 
-def handler_calibrate():
-    global program_mode, calibrator, calibration_data, saver
-    return_val = calibrator.process_data(last_data)
-    # Make sure to use the uncalibrated, raw data!
+def handler_zero():
+    global program_mode, zeroer, zero_data, saver
+    return_val = zeroer.process_data(last_data)
+    # Make sure to use the unzeroed, raw data!
 
     if return_val == "False": program_mode = "EXIT"
 
     if "DATA" in return_val:
         rv = return_val.split(",")
-        calibration_data = [float(rv[1]), float(rv[2])]
-        print("Calibrated, b=", calibration_data)
+        zero_data = [float(rv[1]), float(rv[2])]
+        print("zeroed, b=", zero_data)
         saver.save_data(program_mode)
         saver.clear()
 
@@ -124,7 +131,7 @@ def main_handler():
     Essentially just takes in the data, saves it, then routes the data to
     visualization system is determined by the program_mode
     """
-    global last_data, calibrated_last_data, remote_conn, data_conn, program_start_time, program_mode, saved_MVT_L, saved_MVT_R
+    global last_data, zeroed_last_data, remote_conn, data_conn, program_start_time, program_mode, saved_MVT_L, saved_MVT_R
 
     # Parse commands first, to make sure that we're always in the proper state
     while remote_conn.poll():
@@ -146,14 +153,14 @@ def main_handler():
                 saver.save_data(program_mode)
             elif msg[1] == "CLEAR":
                 saver.clear()
-                saver.add_data("raw_torqueL,raw_torqueR,calibrated_torqueL,calibrated_torqueR,MVT_L,MVT_R,Time")
+                saver.add_data("raw_torqueL,raw_torqueR,zeroed_torqueL,zeroed_torqueR,MVT_L,MVT_R,Time")
 
             elif msg[1] == "START":
                 if "MVT" in program_mode:
                     mvt.begin_automation()
 
-                elif "CALIBRATE" in program_mode:
-                    calibrator.begin_calibration()
+                elif "ZERO" in program_mode:
+                    zeroer.begin_zeroing()
 
                 elif "CONST_ERROR" in program_mode:
                     const_error_test.begin_automation()
@@ -164,25 +171,26 @@ def main_handler():
         if msg[0] == "DATA":
             msg = msg[1]
             # Data comes in as TorqueL, TorqueR, Time
-            # Save as raw_torqueL, raw_torqueR, calibrated_torqueL, calibrated_torqueR, MVT_L, MVT_R, Time
+            # Save as raw_torqueL, raw_torqueR, zeroed_torqueL, zeroed_torqueR, MVT_L, MVT_R, Time
             if msg[0] == None or msg[1] == None:
                 continue
 
             last_data = [float(msg[0]), float(msg[1])]
-            calibrated_last_data = calibrated(last_data)
+            zeroed_last_data = zeroed(last_data)
 
-            saver.add_data(f"{last_data[0]},{last_data[1]},{calibrated_last_data[0]},{calibrated_last_data[1]},{saved_MVT_L},{saved_MVT_R},{float(msg[2]) - program_start_time}")
+            saver.add_data(f"{last_data[0]},{last_data[1]},{zeroed_last_data[0]},{zeroed_last_data[1]},{saved_MVT_L},{saved_MVT_R},{float(msg[2]) - program_start_time}")
 
     # Run methods conditionally based on the mode, calling the above handlers
-    # ["DEV_MODE", "CALIBRATE", "MVT_L", "MVT_R", "CONST_ERROR_L", "CONST_ERROR_R", "MAIN_GAME"]
+    # ["DEV_MODE", "ZERO", "MVT_L", "MVT_R", "CONST_ERROR_L", "CONST_ERROR_R", "MAIN_GAME"]
     switcher = {
         "DEV_MODE":     handler_dev_mode,
-        "CALIBRATE":    handler_calibrate,
+        "ZERO":         handler_zero,
         "MVT_L":        handler_mvt_L,
         "MVT_R":        handler_mvt_R,
         "CONST_ERROR_L":handler_const_error_l,
         "CONST_ERROR_R":handler_const_error_r,
         "MAIN_GAME":    handler_main_game,
+        "BAR_TEST":     handler_bar_test,
         "EXIT":         handler_exit
     }
 
@@ -251,9 +259,9 @@ if __name__ == '__main__':
 
     audio_cues['pull hard'] = pygame.mixer.Sound('sound_effects/pullhard.wav')
 
-    audio_cues['beginning calibration'] = pygame.mixer.Sound('sound_effects/beginningCalibration.wav')
+    audio_cues['beginning zero'] = pygame.mixer.Sound('sound_effects/beginningCalibration.wav')
 
-    audio_cues['end calibration'] = pygame.mixer.Sound('sound_effects/endCalibration.wav')
+    audio_cues['end zero'] = pygame.mixer.Sound('sound_effects/endCalibration.wav')
 
     audio_cues['pull to line'] = pygame.mixer.Sound('sound_effects/pullLine.wav')
 
@@ -273,20 +281,22 @@ if __name__ == '__main__':
     game.max_force = 1
     game.min_force = 0
 
+    bar_test = bar_test(screen, audio_cues)
+
     const_error_test = error_test(screen, audio_cues, 30)
 
-    calibrator = calibrator(screen, audio_cues)
+    zeroer = zeroer(screen, audio_cues)
 
     # global variables to store data during the test
     saved_MVT_L, saved_MVT_R = 1.0, 1.0
 
-    # Array containing the calibration matrix
-    calibration_data = [0, 0]
+    # Array containing the zero matrix
+    zero_data = [0, 0]
 
     # Global variable to store last data as a buffer, in case there's an issue
     # or a break in the data collection
     last_data = [0, 0]
-    calibrated_last_data = [0.0, 0.0]
+    zeroed_last_data = [0.0, 0.0]
 
     # Forever loop that gets forcefully exited out of via the handler_exit
     while True:
