@@ -10,7 +10,7 @@ class remote:
         # Stores if a save signal should be sent when program mode is changed
         self.save_change = False
 
-        program_modes = ["DEV_MODE", "CALIBRATE", "MVT_L", "MVT_R", "CONST_ERROR_L", "CONST_ERROR_R", "MAIN_GAME"]
+        program_modes = ["DEV_MODE", "ZERO", "MVT_L", "MVT_R", "CONST_ERROR_L", "CONST_ERROR_R", "BAR_TEST", "MAIN_GAME"]
 
         def send_quit():
             if self.save_change:
