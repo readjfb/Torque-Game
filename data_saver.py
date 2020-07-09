@@ -14,7 +14,7 @@ class data_saver(object):
         self.data_cache = []
         self.save_dir = os.getcwd() + "/tests/" + save_directory
 
-        file_paths = ["/calibrations", "/MVT_L", "/MVT_R", "/game_testing", "/const_error_test_l", "/const_error_test_r"]
+        file_paths = ["/zeros", "/MVT_L", "/MVT_R", "/game_testing", "/const_error_test_l", "/const_error_test_r"]
 
         file_paths = [self.save_dir+path for path in file_paths]
 
@@ -64,7 +64,7 @@ class data_saver(object):
         elif mode == "CONST_ERROR_R":
             path = self.save_dir + "/const_error_test_r/"
         else:
-            path = self.save_dir + "/calibrations/"
+            path = self.save_dir + "/zeros/"
 
         i = 0
         while os.path.exists(f"{path}{mode}_data{i}.csv"):
