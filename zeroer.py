@@ -7,7 +7,7 @@ import time
 
 
 class zeroer:
-    def __init__(self, screen, sound_effects, fps=10):
+    def __init__(self, screen, sound_effects, state, fps=10):
         self.screen = screen
         self.width, self.height = screen.get_size()
 
@@ -24,6 +24,8 @@ class zeroer:
         self.prev_time = time.time()
         self.refrence_time = time.time()
         self.frame_time = 1.0/fps
+
+        self.state = state
 
         self.internal_mode = "ZERO"
 
@@ -79,6 +81,8 @@ class zeroer:
         '''
 
         time_0, time_1 = 2, 5
+
+        self.state[0] = self.internal_mode
 
         if self.internal_mode == "ZERO":
             return self.display_clear()

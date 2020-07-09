@@ -4,7 +4,7 @@ class data_saver(object):
     """
     data_saver encapsulates a cache of data to be saved as well as the underlying code to save the data
     """
-    def __init__(self, save_directory):
+    def __init__(self, save_directory, state):
         """
         Construct a new 'data_saver' object.
 
@@ -25,6 +25,8 @@ class data_saver(object):
                 print ("Creation of the directory %s failed" % path)
             else:
                 print ("Successfully created the directory %s" % path)
+
+        self.state = state
 
     def add_data(self, line):
         """

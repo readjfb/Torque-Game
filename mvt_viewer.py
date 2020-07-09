@@ -20,7 +20,7 @@ class rectangle(object):
 
 
 class mvt_viewer(object):
-    def __init__(self, surface, audio_cues, scale_min=None, scale_max=None, fps=25):
+    def __init__(self, surface, audio_cues, state, scale_min=None, scale_max=None, fps=25):
         """
         :param height: Height of pygame window
         :param width: Width of pygame window
@@ -31,6 +31,8 @@ class mvt_viewer(object):
         """
 
         self.audio_cues = audio_cues
+
+        self.state = state
 
         self.width, self.height = surface.get_size()
 
@@ -107,6 +109,8 @@ class mvt_viewer(object):
         time_0, time_1 = 2, 6
 
         default = "DISPLAY_MVT"
+
+        self.state[0] = self.internal_mode
 
         '''To be used in mode selection
 

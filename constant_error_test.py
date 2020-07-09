@@ -3,7 +3,7 @@ import time
 
 
 class error_test:
-    def __init__(self, screen, audio_cues, fps=30):
+    def __init__(self, screen, audio_cues, state, fps=30):
         self.screen = screen
         self.audio_cues = audio_cues
 
@@ -13,6 +13,8 @@ class error_test:
 
         self.frame_time = 1.0/fps
         self.prev_time = time.time()
+
+        self.state = state
 
         '''
             "DEFAULT" - Display blank screen with a static circle
@@ -69,6 +71,8 @@ class error_test:
         time_0, time_1, time_2 = 2, 2, 8
 
         current_perc = ref_force/ref_max_force
+
+        self.state[0] = self.internal_mode
 
         if self.internal_mode == "DEFAULT":
             self.display_clear()
