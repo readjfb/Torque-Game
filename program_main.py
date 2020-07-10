@@ -121,7 +121,6 @@ def handler_zero():
 
 
 def main_handler():
-    print(program_state)
     """
     Loops continuously, constantly getting called
 
@@ -132,7 +131,7 @@ def main_handler():
     Essentially just takes in the data, saves it, then routes the data to
     visualization system is determined by the program_mode
     """
-    global last_data, zeroed_last_data, remote_conn, data_conn, program_start_time, program_mode, saved_MVT_L, saved_MVT_R
+    global last_data, zeroed_last_data, remote_conn, data_conn, program_start_time, program_mode, saved_MVT_L, saved_MVT_R, demographic_info
 
     # Parse commands first, to make sure that we're always in the proper program_state
     while remote_conn.poll():
@@ -155,7 +154,12 @@ def main_handler():
                 saver.save_data(program_mode)
             elif msg[1] == "CLEAR":
                 saver.clear()
-                saver.add_data("raw_torqueL,raw_torqueR,zeroed_torqueL,zeroed_torqueR,MVT_L,MVT_R,Time,program_state")
+                header = "raw_torqueL, raw_torqueR, zeroed_torqueL, zeroed_torqueR, MVT_L, MVT_R, Time, program_state, "
+
+                keys = demographic_info.keys()
+                header += ", ".join(keys)
+
+                saver.add_data(header)
 
             elif msg[1] == "START":
                 if "MVT" in program_mode:
@@ -167,13 +171,17 @@ def main_handler():
                 elif "CONST_ERROR" in program_mode:
                     const_error_test.begin_automation()
 
+        elif msg[0] == "DEMO":
+            demographic_info = msg[1].copy()
+
+
     # Parse data commands (There may be many, but loop through and save all of them to ensure that we don't lose any)
     while data_conn.poll():
         msg = data_conn.recv()
         if msg[0] == "DATA":
             msg = msg[1]
             # Data comes in as TorqueL, TorqueR, Time
-            # Save as raw_torqueL, raw_torqueR, zeroed_torqueL, zeroed_torqueR, MVT_L, MVT_R, Time
+            # Save as raw_torqueL, raw_torqueR, zeroed_torqueL, zeroed_torqueR, MVT_L, MVT_R, Time, then the various demographic info
             if msg[0] == None or msg[1] == None:
                 continue
 
@@ -184,7 +192,12 @@ def main_handler():
             save_str += f"{zeroed_last_data[0]}, {zeroed_last_data[1]}, "
             save_str += f"{saved_MVT_L}, {saved_MVT_R}, "
             save_str += f"{float(msg[2]) - program_start_time}, "
-            save_str += f"{program_state[0]}"
+            save_str += f"{program_state[0]}, "
+
+            vals = demographic_info.values()
+            vals = [str(x) for x in vals]
+
+            save_str += ", ".join(vals)
 
             saver.add_data(save_str)
 
@@ -308,6 +321,18 @@ if __name__ == '__main__':
     # or a break in the data collection
     last_data = [0, 0]
     zeroed_last_data = [0.0, 0.0]
+
+    demographic_info = {
+        "age": 0,
+        "id": "NULL",
+        "gender": "NULL",
+        "subject type": "NULL",
+        "diabetes": "NULL",
+        "dominant arm": "NULL",
+        "arm length": 0,
+        "z offset": 0,
+        "years_from_stroke": 0
+    }
 
     # Forever loop that gets forcefully exited out of via the handler_exit
     while True:
