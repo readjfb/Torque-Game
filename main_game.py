@@ -63,7 +63,7 @@ class box:
 
 
 class game(object):
-    def __init__(self, screen, paddle_radius, fps=25):
+    def __init__(self, screen, paddle_radius, state, fps=25):
         """
         Creates the main tray game
 
@@ -113,6 +113,8 @@ class game(object):
         self.ball = ball((fourth*2, 550), self.space, 10)
 
         self.draw_options = pymunk.pygame_util.DrawOptions(screen)
+
+        self.state = state
 
     def converted(self, point):
         """

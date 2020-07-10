@@ -5,13 +5,15 @@ from pygame.color import *
 import math
 
 class bar_test:
-    def __init__(self, screen, sound_cues):
+    def __init__(self, screen, sound_cues, state):
         self.screen = screen
         self.sound_cues = sound_cues
 
         self.width, self.height = screen.get_size()
 
         self.center = (self.width // 2, self.height // 2)
+
+        self.state = state
 
     def flipped(self, value):
         return self.height - value
