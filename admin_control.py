@@ -54,6 +54,9 @@ class remote:
             }
             conn.send(("DEMO",demographic_info))
 
+        def send_mvt():
+            return
+
         app = App(title="Torque Game Admin Control", layout="grid")
         upper_box = Box(app, layout="grid", grid=[0, 0], border=True, width="fill")
 
@@ -70,9 +73,9 @@ class remote:
 
         quit_button = PushButton(upper_box, command=send_quit, text="Quit", grid=[2, 2], align="right")
 
-        lower_box = Box(app, layout="grid", grid=[0, 1],border=True, width="fill")
+        lower_box = Box(app, layout="grid", grid=[0, 1],border=True, width="fill", align="left")
         age_text = Text(lower_box, text="Age", grid=[0,0])
-        age_entry = TextBox(lower_box, text="age", grid=[1,0])
+        age_entry = TextBox(lower_box, text="Age", grid=[1,0])
 
         id_text = Text(lower_box, text="Id", grid=[0, 1])
         id_entry = TextBox(lower_box, text="Id", grid=[1, 1])
@@ -99,6 +102,17 @@ class remote:
         stroke_distance_entry = TextBox(lower_box, text="years from stroke", grid=[1, 8])
 
         send_demographics_button = PushButton(lower_box, command=send_demographics, text="send_demographics", grid=[0, 9])
+
+        right_box = Box(app, layout="grid", grid=[1, 1],border=True, align="left")
+        head = Text(right_box, text="Manually set MVT values. \nProgram will default to collected values \nnot be reflected by this value", height=3, grid=[0,0])
+
+        mvtL_text = Text(right_box, text="MVT L", grid=[0, 1])
+        mvtL_entry = TextBox(right_box, text="1", grid=[1, 1])
+
+        mvtR_text = Text(right_box, text="MVT R", grid=[0, 2])
+        mvtR_entry = TextBox(right_box, text="1", grid=[1, 2])
+
+        send_demographics_button = PushButton(right_box, command=send_mvt, text="send", grid=[0, 3])
 
         app.display()
 
