@@ -98,6 +98,7 @@ def handler_main_game():
 
     if return_val == False: program_mode = "EXIT"
 
+
 def handler_bar_test():
     global program_mode, main_game, zeroed_last_data
     return_val = bar_test.process_data(zeroed_last_data[0], zeroed_last_data[1], saved_MVT_L, saved_MVT_R)
@@ -174,6 +175,9 @@ def main_handler():
         elif msg[0] == "DEMO":
             demographic_info = msg[1].copy()
 
+        elif msg[0] == "MVT":
+            saved_MVT_L, saved_MVT_R = msg[1]
+
 
     # Parse data commands (There may be many, but loop through and save all of them to ensure that we don't lose any)
     while data_conn.poll():
@@ -200,6 +204,10 @@ def main_handler():
             save_str += ", ".join(vals)
 
             saver.add_data(save_str)
+
+
+    # Send the mvt data repeatedly
+    remote_conn.send(("MVT", saved_MVT_L, saved_MVT_R))
 
     # Run methods conditionally based on the mode, calling the above handlers
     # ["DEV_MODE", "ZERO", "MVT_L", "MVT_R", "CONST_ERROR_L", "CONST_ERROR_R", "MAIN_GAME"]

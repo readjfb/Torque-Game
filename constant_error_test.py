@@ -122,8 +122,8 @@ class error_test:
 
         error = target_perc_1 - target_perc_2
 
-        if self.internal_mode != "DEFAULT":
-            print(target_perc_1, target_perc_2, error)
+        # if self.internal_mode != "DEFAULT":
+        #     print(target_perc_1, target_perc_2, error)
 
         if time.time() - self.prev_time > self.frame_time:
             return self.process_mode(ref_force, ref_max_force, target_perc)
