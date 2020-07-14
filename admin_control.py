@@ -65,12 +65,13 @@ class remote:
                 "years_from_stroke": stroke_distance_entry.value
             }
             conn.send(("DEMO",demographic_info))
-            close_demo()
 
         def send_mvt():
             data = (float(mvtL_entry.value), float(mvtR_entry.value))
             conn.send(("MVT", data))
-            close_mvt()
+
+        def send_error_perc():
+            conn.send(("ERRORPERC", float(target_perc_entry.value)))
 
         def get_connection_data():
             while conn.poll():
@@ -80,13 +81,17 @@ class remote:
                     if not mvt_input.visible:
                         mvtL_entry.value = msg[1]
                         mvtR_entry.value = msg[2]
+                    else:
+                        mvtL_text.value = "MVT_L" + str(msg[1])
+                        mvtR_text.value = "MVT_R" + str(msg[2])
+
 
         app = App(title="Torque Game Admin Control", layout="grid")
         upper_box = Box(app, layout="grid", grid=[0, 0], border=True, width="fill")
 
         result = Text(upper_box, text="Default selection", grid=[1, 0], align="top")
         # Schedule a command to listen to data
-        result.repeat(30, get_connection_data)
+        result.repeat(10, get_connection_data)
 
         combo = Combo(upper_box, options=program_modes, command=mode_select_command_parser, grid=[1, 1], align="top")
 
@@ -102,6 +107,16 @@ class remote:
         open_mvt_button = PushButton(upper_box, command=open_mvt, text="Enter MVT", grid=[2,3], align="right")
 
         open_demo_button = PushButton(upper_box, command=open_demo, text="Enter Demographics", grid=[2,4], align="right")
+
+        """
+        Secondary control box
+        """
+        lower_box = Box(app, layout="grid", grid=[0, 1], border=True, width="fill")
+        target_perc_text = Text(lower_box, text="Target Const. Error Percentage", grid=[0, 0])
+        target_perc_entry = TextBox(lower_box, text=".25", grid=[1,0])
+
+        enter_target_perc = PushButton(lower_box, command=send_error_perc, text="Enter", grid=[2,0])
+
 
         """
         Demographic inputs
@@ -142,7 +157,7 @@ class remote:
         """
         mvt_input = Window(app, layout="grid", title="MVT_Window", visible=False)
         
-        head = Text(mvt_input, text="Manually set MVT values. \nProgram will default to collected values \nnot be reflected by this value", height=3, grid=[0,0])
+        head = Text(mvt_input, text="Manually set MVT values.\nCurrent value is in left collumn", height=3, grid=[0,0])
 
         mvtL_text = Text(mvt_input, text="MVT L", grid=[0, 1])
         mvtL_entry = TextBox(mvt_input, text="1", grid=[1, 1])
@@ -151,6 +166,8 @@ class remote:
         mvtR_entry = TextBox(mvt_input, text="1", grid=[1, 2])
 
         send_demographics_button = PushButton(mvt_input, command=send_mvt, text="send", grid=[0, 3])
+
+        
 
         app.display()
 

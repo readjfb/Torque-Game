@@ -69,9 +69,9 @@ def handler_mvt_R():
 
 
 def handler_const_error_l():
-    global program_mode, const_error_test, saved_MVT_L, saved_MVT_R
+    global program_mode, const_error_test, saved_MVT_L, saved_MVT_R, const_error_target_perc
 
-    return_val = const_error_test.process_data(zeroed_last_data[0], saved_MVT_L, .25, zeroed_last_data[1], saved_MVT_R)
+    return_val = const_error_test.process_data(zeroed_last_data[0], saved_MVT_L, const_error_target_perc, zeroed_last_data[1], saved_MVT_R)
 
     if return_val == "False": program_mode = "EXIT"
 
@@ -81,9 +81,9 @@ def handler_const_error_l():
 
 
 def handler_const_error_r():
-    global program_mode, const_error_test, saved_MVT_L, saved_MVT_R
+    global program_mode, const_error_test, saved_MVT_L, saved_MVT_R, const_error_target_perc
 
-    return_val = const_error_test.process_data(zeroed_last_data[1], saved_MVT_R, .25, zeroed_last_data[0], saved_MVT_L)
+    return_val = const_error_test.process_data(zeroed_last_data[1], saved_MVT_R, const_error_target_perc, zeroed_last_data[0], saved_MVT_L)
 
     if return_val == "False": program_mode = "EXIT"
 
@@ -132,7 +132,7 @@ def main_handler():
     Essentially just takes in the data, saves it, then routes the data to
     visualization system is determined by the program_mode
     """
-    global last_data, zeroed_last_data, remote_conn, data_conn, program_start_time, program_mode, saved_MVT_L, saved_MVT_R, demographic_info
+    global last_data, zeroed_last_data, remote_conn, data_conn, program_start_time, program_mode, saved_MVT_L, saved_MVT_R, demographic_info, const_error_target_perc
 
     # Parse commands first, to make sure that we're always in the proper program_state
     while remote_conn.poll():
@@ -177,6 +177,10 @@ def main_handler():
 
         elif msg[0] == "MVT":
             saved_MVT_L, saved_MVT_R = msg[1]
+
+        elif msg[0] == "ERRORPERC":
+            const_error_target_perc = msg[1]
+
 
 
     # Parse data commands (There may be many, but loop through and save all of them to ensure that we don't lose any)
@@ -236,7 +240,7 @@ if __name__ == '__main__':
     # Socket ports. Ensure that these values are consistent with values in data streaming areas
     remote_port, data_port = 6006, 6007
 
-    # Using a list so that i can give a ref to it. TODO: Change this comment
+    # Using a list so that I can give a ref to it. TODO: Change this comment
     program_state = ["DEV_MODE"]
 
     """
@@ -310,8 +314,7 @@ if __name__ == '__main__':
 
     main_game = game(screen, 19, program_state)
     # These should be set again once automation is setup for the game
-    game.max_force = 1
-    game.min_force = 0
+    game.max_force, game.min_force = 1, 0
 
     bar_test = bar_test(screen, audio_cues, program_state)
 
@@ -324,6 +327,8 @@ if __name__ == '__main__':
 
     # Array containing the zero matrix
     zero_data = [0, 0]
+
+    const_error_target_perc = .25
 
     # Global variable to store last data as a buffer, in case there's an issue
     # or a break in the data collection
