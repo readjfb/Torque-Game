@@ -132,33 +132,33 @@ class error_test:
 
         return "True"
 
-    def display_circles(self, f_1, max_f_1, f_2, max_f_2):
-        self.screen.fill(self.bg_color)
+    # def display_circles(self, f_1, max_f_1, f_2, max_f_2):
+    #     self.screen.fill(self.bg_color)
 
-        center = (self.width//2, self.height//2)
+    #     center = (self.width//2, self.height//2)
 
-        h = self.height // 2
+    #     h = self.height // 2
 
-        rad_1 = max(int((f_1/max_f_1) * h), 5)
-        rad_2 = max(int((f_2/max_f_2) * h), 5)
+    #     rad_1 = max(int((f_1/max_f_1) * h), 5)
+    #     rad_2 = max(int((f_2/max_f_2) * h), 5)
 
-        pygame.draw.circle(self.screen, (255, 0, 0), center, rad_1, 5)
+    #     pygame.draw.circle(self.screen, (255, 0, 0), center, rad_1, 5)
 
-        pygame.draw.circle(self.screen, (0, 0, 255), center, rad_2, 5)
+    #     pygame.draw.circle(self.screen, (0, 0, 255), center, rad_2, 5)
 
-        pygame.display.update()
+    #     pygame.display.update()
 
-    def process_data_debug(self, f_1, max_f_1, f_2, max_f_2, hide=False):
-        for event in pygame.event.get():
-            if event.type == pygame.QUIT:
-                return "False"
+    # def process_data_debug(self, f_1, max_f_1, f_2, max_f_2, hide=False):
+    #     for event in pygame.event.get():
+    #         if event.type == pygame.QUIT:
+    #             return "False"
 
-        if time.time() - self.prev_time > self.frame_time:
-            if hide:
-                self.display_clear()
-            else:
-                self.display_circles(f_1, max_f_1, f_2, max_f_2)
+    #     if time.time() - self.prev_time > self.frame_time:
+    #         if hide:
+    #             self.display_clear()
+    #         else:
+    #             self.display_circles(f_1, max_f_1, f_2, max_f_2)
 
-            self.prev_time = time.time()
+    #         self.prev_time = time.time()
 
-        return "True"
+    #     return "True"

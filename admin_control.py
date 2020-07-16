@@ -75,7 +75,10 @@ class remote:
 
         def get_connection_data():
             while conn.poll():
-                msg = conn.recv()
+                try:
+                    msg = conn.recv()
+                except EOFError:
+                    send_quit()
 
                 if msg[0] == "MVT":
                     if not mvt_input.visible:
@@ -85,13 +88,21 @@ class remote:
                         mvtL_text.value = "MVT_L" + str(msg[1])
                         mvtR_text.value = "MVT_R" + str(msg[2])
 
+        def send_target_mvt():
+            return
+            # TO BE IMPLEMENTED
+
+        def pause_tests():
+            return
+            # TB Implemented
+
 
         app = App(title="Torque Game Admin Control", layout="grid")
         upper_box = Box(app, layout="grid", grid=[0, 0], border=True, width="fill")
 
         result = Text(upper_box, text="Default selection", grid=[1, 0], align="top")
         # Schedule a command to listen to data
-        result.repeat(10, get_connection_data)
+        
 
         combo = Combo(upper_box, options=program_modes, command=mode_select_command_parser, grid=[1, 1], align="top")
 
@@ -114,8 +125,13 @@ class remote:
         lower_box = Box(app, layout="grid", grid=[0, 1], border=True, width="fill")
         target_perc_text = Text(lower_box, text="Target Const. Error Percentage", grid=[0, 0])
         target_perc_entry = TextBox(lower_box, text=".25", grid=[1,0])
-
         enter_target_perc = PushButton(lower_box, command=send_error_perc, text="Enter", grid=[2,0])
+
+        mvt_target_force_text = Text(lower_box, text="Target MVT Force", grid=[0, 1])
+        mvt_target_force_entry = TextBox(lower_box, text="1", grid=[1,1]) 
+        enter_mvt_target_force = PushButton(lower_box, command=send_target_mvt, text="Enter", grid=[2,1])
+
+        pause_button = PushButton(lower_box, command=pause_tests, text="Pause", grid=[1,3])
 
 
         """
@@ -167,7 +183,7 @@ class remote:
 
         send_demographics_button = PushButton(mvt_input, command=send_mvt, text="send", grid=[0, 3])
 
-        
+        result.repeat(10, get_connection_data)
 
         app.display()
 
