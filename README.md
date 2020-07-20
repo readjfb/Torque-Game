@@ -29,7 +29,7 @@ The game is being developed on macOS Mojave 10.14.6, during which there are a nu
 If a wrong combination of Python version + TKinter + OS is used, the computer may crash. 
 
 ## Notes
-While the data saving at 1KhZ is consistent +- 1 sample/second, the fps in the visual displays is not consistent, and the locked fps stated in each of the objects should not be relied on. Data can be stored and generated at a higher fps, if desired, but it varies based on system power. It has run at 2500 KhZ +- 2 samples/ second, but beyond that I found it to be susceptible to large drops in data save.
+While the data saving at 1KhZ is consistent +- 1 sample/second, the fps in the visual displays is not consistent, and the locked fps stated in each of the objects should not be relied on. Data can be stored and generated at a higher fps, if desired, but it varies based on system power. It has run at 2500 KhZ +- 3 samples/ second, but beyond that I found it to be susceptible to large drops in data save.
 
 ## To-Dos
 - [X] Finish a prototype of the game
@@ -45,5 +45,5 @@ While the data saving at 1KhZ is consistent +- 1 sample/second, the fps in the v
 - [ ] ~~Add automated system for main_game~~
 - [X] Add schematic of Arduino layout to folder
 - [X] Create prototype constant error match test system
-- [ ] Prototype stage 4
-- [ ] **Add GUI system for manually setting MVT percentage in constant_error_tests**
+- [X] Prototype stage 4
+- [X] **Add GUI system for manually setting MVT percentage in constant_error_tests**
