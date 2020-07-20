@@ -3,7 +3,6 @@ from multiprocessing.connection import Listener
 from data_saver import data_saver
 from mvt_viewer import mvt_viewer
 from clear_screen import clearer
-from new_game import game
 from zeroer import zeroer
 from constant_error_test import error_test
 from bar_game import bar_game
