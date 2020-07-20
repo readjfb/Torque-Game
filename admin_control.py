@@ -10,7 +10,7 @@ class remote:
         # Stores if a save signal should be sent when program mode is changed
         self.save_change = False
 
-        program_modes = ["DEV_MODE", "ZERO", "MVT_L", "MVT_R", "CONST_ERROR_L", "CONST_ERROR_R", "BAR_TEST", "MAIN_GAME"]
+        program_modes = ["DEV_MODE", "ZERO", "MVT_L", "MVT_R", "CONST_ERROR_L", "CONST_ERROR_R", "MAIN_GAME"]
 
         def send_quit():
             if self.save_change:
@@ -85,24 +85,45 @@ class remote:
                         mvtL_entry.value = msg[1]
                         mvtR_entry.value = msg[2]
                     else:
-                        mvtL_text.value = "MVT_L" + str(msg[1])
-                        mvtR_text.value = "MVT_R" + str(msg[2])
+                        if str(msg[1]) not in mvtL_text.value:
+                            mvtL_text.value = "MVT_L" + str(msg[1])
+                        if str(msg[2]) not in mvtR_text.value: 
+                            mvtR_text.value = "MVT_R" + str(msg[2])
+               
+                elif msg[0] == "TARGET_MVT":
+                    if str(msg[1]) not in mvt_target_force_text.value and mvt_target_force_text.visible:
+                        mvt_target_force_text.value = "Target MVT: " + str(msg[1])
+                
+                elif msg[0] == "CONTINUE":
+                    if msg[1]: #If the current mode is to continue
+                        t = "Pause"
+                    else:
+                        t = "Continue"
+
+                    if toggle_button.text != t:
+                        toggle_button.text = t
+
 
         def send_target_mvt():
-            return
-            # TO BE IMPLEMENTED
+            data = float(mvt_target_force_entry.value)
+            conn.send(("TARGET_MVT", data))
 
-        def pause_tests():
-            return
-            # TB Implemented
+        def send_match():
+            conn.send(("MATCH"))
 
+        # CONTINUE
+        # PAUSE
+        def toggle_automation():
+            if toggle_button.text == "Continue":
+                conn.send(("CONTINUE", True))
+            else:
+                conn.send(("CONTINUE", False))
 
         app = App(title="Torque Game Admin Control", layout="grid")
         upper_box = Box(app, layout="grid", grid=[0, 0], border=True, width="fill")
 
         result = Text(upper_box, text="Default selection", grid=[1, 0], align="top")
         # Schedule a command to listen to data
-        
 
         combo = Combo(upper_box, options=program_modes, command=mode_select_command_parser, grid=[1, 1], align="top")
 
@@ -119,6 +140,9 @@ class remote:
 
         open_demo_button = PushButton(upper_box, command=open_demo, text="Enter Demographics", grid=[2,4], align="right")
 
+        toggle_button = PushButton(upper_box, command=toggle_automation, text="Pause", grid=[0,4])
+
+
         """
         Secondary control box
         """
@@ -127,11 +151,7 @@ class remote:
         target_perc_entry = TextBox(lower_box, text=".25", grid=[1,0])
         enter_target_perc = PushButton(lower_box, command=send_error_perc, text="Enter", grid=[2,0])
 
-        mvt_target_force_text = Text(lower_box, text="Target MVT Force", grid=[0, 1])
-        mvt_target_force_entry = TextBox(lower_box, text="1", grid=[1,1]) 
-        enter_mvt_target_force = PushButton(lower_box, command=send_target_mvt, text="Enter", grid=[2,1])
-
-        pause_button = PushButton(lower_box, command=pause_tests, text="Pause", grid=[1,3])
+        match_button = PushButton(lower_box, command=send_match, text="Match", grid=[2,1])
 
 
         """
@@ -181,7 +201,11 @@ class remote:
         mvtR_text = Text(mvt_input, text="MVT R", grid=[0, 2])
         mvtR_entry = TextBox(mvt_input, text="1", grid=[1, 2])
 
-        send_demographics_button = PushButton(mvt_input, command=send_mvt, text="send", grid=[0, 3])
+        send_mvt_inputs_button = PushButton(mvt_input, command=send_mvt, text="send", grid=[0, 3])
+
+        mvt_target_force_text = Text(mvt_input, text="Target MVT Force", grid=[3, 1])
+        mvt_target_force_entry = TextBox(mvt_input, text="1", grid=[3,2]) 
+        enter_mvt_target_force = PushButton(mvt_input, command=send_target_mvt, text="Enter", grid=[3,3])
 
         result.repeat(10, get_connection_data)
 

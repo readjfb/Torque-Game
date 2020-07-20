@@ -4,19 +4,17 @@ from data_saver import data_saver
 from mvt_viewer import mvt_viewer
 from clear_screen import clearer
 from new_game import game
-# from main_game import game
-from bar_test import bar_test
 from zeroer import zeroer
 from constant_error_test import error_test
+from bar_game import bar_game
 
 import pygame
-# from pygame.locals import *
 
 import time
 from time import strftime, localtime
 
 
-program_modes = ["DEV_MODE", "ZERO", "MVT_L", "MVT_R", "CONST_ERROR_L", "CONST_ERROR_R", "BAR_TEST", "MAIN_GAME"]
+program_modes = ["DEV_MODE", "ZERO", "MVT_L", "MVT_R", "CONST_ERROR_L", "CONST_ERROR_R", "MAIN_GAME"]
 
 
 def zeroed(data):
@@ -99,20 +97,17 @@ def handler_main_game():
 
     # if return_val == False: program_mode = "EXIT"
 
-    global program_mode, main_game, zeroed_last_data, saved_MVT_L, saved_MVT_R
-    return_val = main_game.update_tick(zeroed_last_data[0], saved_MVT_L, zeroed_last_data[1], saved_MVT_R)
+    # global program_mode, main_game, zeroed_last_data, saved_MVT_L, saved_MVT_R
+    # return_val = main_game.update_tick(zeroed_last_data[0], saved_MVT_L, zeroed_last_data[1], saved_MVT_R)
 
-    if return_val == "False": program_mode = "EXIT"
+    # if return_val == "False": program_mode = "EXIT"
 
-    elif "SAVE" in return_val:
-        saver.save_data(program_mode)
-        saver.clear() 
+    # elif "SAVE" in return_val:
+    #     saver.save_data(program_mode)
+    #     saver.clear() 
 
-
-
-def handler_bar_test():
     global program_mode, main_game, zeroed_last_data
-    return_val = bar_test.process_data(zeroed_last_data[0], zeroed_last_data[1], saved_MVT_L, saved_MVT_R)
+    return_val = main_game.process_data(zeroed_last_data[0], zeroed_last_data[1], saved_MVT_L, saved_MVT_R)
 
     if return_val == False: program_mode = "EXIT"
 
@@ -143,7 +138,8 @@ def main_handler():
     Essentially just takes in the data, saves it, then routes the data to
     visualization system is determined by the program_mode
     """
-    global last_data, zeroed_last_data, remote_conn, data_conn, program_start_time, program_mode, saved_MVT_L, saved_MVT_R, demographic_info, const_error_target_perc
+    # i really, need to refactor this to stop using the global vars
+    global last_data, test_data, mvt, zeroed_last_data, remote_conn, data_conn, program_start_time, program_mode, saved_MVT_L, saved_MVT_R, demographic_info, const_error_target_perc
 
     # Parse commands first, to make sure that we're always in the proper program_state
     while remote_conn.poll():
@@ -187,17 +183,21 @@ def main_handler():
                 elif "MAIN_GAME" in program_mode:
                     main_game.begin_automation()
 
-                elif "BAR_TEST" in program_mode:
-                    bar_test.begin_automation()
-
         elif msg[0] == "DEMO":
             demographic_info = msg[1].copy()
 
         elif msg[0] == "MVT":
             saved_MVT_L, saved_MVT_R = msg[1]
 
+        elif msg[0] == "TARGET_MVT":
+            mvt.scale_max = msg[1]
+
         elif msg[0] == "ERRORPERC":
             const_error_target_perc = msg[1]
+
+        elif msg[0] == "CONTINUE":
+            test_data['continue'] = msg[1]
+            print(test_data['continue'])
 
     # Parse data commands (There may be many, but loop through and save all of them to ensure that we don't lose any)
     while data_conn.poll():
@@ -229,6 +229,8 @@ def main_handler():
     # Send the mvt data repeatedly
     try:
         remote_conn.send(("MVT", saved_MVT_L, saved_MVT_R))
+        remote_conn.send(("TARGET_MVT", mvt.scale_max))
+        remote_conn.send(("CONTINUE", test_data['continue']))
     except EOFError:
         handler_exit()
 
@@ -242,7 +244,6 @@ def main_handler():
         "CONST_ERROR_L":handler_const_error_l,
         "CONST_ERROR_R":handler_const_error_r,
         "MAIN_GAME":    handler_main_game,
-        "BAR_TEST":     handler_bar_test,
         "EXIT":         handler_exit
     }
 
@@ -324,6 +325,12 @@ if __name__ == '__main__':
     mvt = mvt_viewer(screen, audio_cues, program_state)
     mvt.scale_max = 1.0
 
+    test_data = {
+        "test_number": 0,
+        "number_of_tests": 100,
+        "continue": False
+    }
+
     """
     Create clearer object, that just serves to create a blank screen. This is
     needed, as pygame gets into problems if you don't give it update commands
@@ -331,11 +338,11 @@ if __name__ == '__main__':
     """
     clearer = clearer(screen)
 
-    main_game = game(screen, audio_cues, 19, program_state)
-    # These should be set again once automation is setup for the game
-    game.max_force, game.min_force = 1, 0
+    # main_game = game(screen, audio_cues, 19, program_state)
+    # # These should be set again once automation is setup for the game
+    # game.max_force, game.min_force = 1, 0
 
-    bar_test = bar_test(screen, audio_cues, program_state)
+    main_game = bar_game(screen, test_data, audio_cues, program_state)
 
     const_error_test = error_test(screen, audio_cues, program_state, 30)
 
