@@ -6,10 +6,11 @@ import math
 
 import time
 
-class bar_test:
-    def __init__(self, screen, sound_cues, state, fps=30):
+class bar_game:
+    def __init__(self, screen, test_data, sound_cues, state, fps=30):
         self.screen = screen
         self.sound_cues = sound_cues
+        self.test_data = test_data
 
         self.width, self.height = screen.get_size()
 
@@ -119,7 +120,7 @@ class bar_test:
         # Set the global program state that's used for saving information 
         self.state[0] = self.internal_mode
 
-        time_0, time_1, time_2 = 2, 2, 5
+        time_0, time_1, time_2, time_3 = 2, 2, 5, 3
 
         raise_thresh = 2 * (.4 * min(l_mvt, r_mvt))
 
@@ -141,9 +142,11 @@ class bar_test:
 
         fork
 
-        MAIN_GAME:MAIN_GAME:FAILURE: Display ball dropping onto platform
+        MAIN_GAME:SUCCESS: Display ball dropping onto platform
 
-        FAILURE: Display ball dropping off platform
+        MAIN_GAME:FAILURE: Display ball dropping off platform
+
+        MAIN_GAME:WAIT: Wait to see if we should loop or not
         """
 
 
@@ -181,16 +184,27 @@ class bar_test:
 
         elif self.internal_mode == "MAIN_GAME:FAILURE":
             if time.time()-self.refrence_time > time_2:
-                self.internal_mode = "MAIN_GAME:DEFAULT"
+                self.internal_mode = "MAIN_GAME:WAIT"
                 return "SAVE,MAIN_GAME:FAILURE"
             return self.display_ball_bar(*self.locked_forces, (255,0,0), (0,0,0), True)
-            
 
         elif self.internal_mode == "MAIN_GAME:SUCCESS":
             if time.time()-self.refrence_time > time_2:
-                self.internal_mode = "MAIN_GAME:DEFAULT"
+                self.internal_mode = "MAIN_GAME:WAIT"
                 return "SAVE,MAIN_GAME:SUCCESS"
             return self.display_ball_bar(*self.locked_forces, (0,255,0), (0, 0, 0), False)
+
+        elif self.internal_mode == "MAIN_GAME:WAIT":
+            if not self.test_data["continue"]:
+                self.internal_mode = "MAIN_GAME:DEFAULT"
+            else:
+                if time.time()-self.refrence_time > time_3:
+                    if self.test_data["test_number"] < self.test_data["number_of_tests"]:
+                        self.internal_mode = "MAIN_GAME:START"
+                        self.test_data["test_number"] += 1
+                        print("LOOP")
+                    else:
+                        self.internal_mode = "MAIN_GAME:DEFAULT"
 
     def begin_automation(self):
         self.internal_mode = "MAIN_GAME:START"
@@ -206,4 +220,4 @@ class bar_test:
 
 
 if __name__ == '__main__':
-    bt = bar_test()
+    bt = bar_game()

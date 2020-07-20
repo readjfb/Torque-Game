@@ -1,3 +1,4 @@
+#!/bin/bash
 source activate torqueenv
 
 python program_main.py &
