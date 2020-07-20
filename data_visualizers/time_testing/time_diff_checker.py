@@ -25,7 +25,10 @@ with open(filename, 'r') as file:
 	for row in reader:
 		# Change the index to the index in the csv of the time value. As of last test,
 		# time value was value 4 in each csv row
-		times.append(float(row[4]))
+		try:
+			times.append(float(row[6]))
+		except:
+			continue
 
 
 deltas = []

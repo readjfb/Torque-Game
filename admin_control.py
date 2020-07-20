@@ -2,7 +2,7 @@
 # It must be started
 
 from multiprocessing.connection import Client
-from guizero import App, Text, Combo, PushButton, CheckBox, Box, TextBox
+from guizero import App, Window, Text, Combo, PushButton, CheckBox, Box, TextBox
 
 
 class remote:
@@ -10,7 +10,7 @@ class remote:
         # Stores if a save signal should be sent when program mode is changed
         self.save_change = False
 
-        program_modes = ["DEV_MODE", "ZERO", "MVT_L", "MVT_R", "CONST_ERROR_L", "CONST_ERROR_R", "BAR_TEST", "MAIN_GAME"]
+        program_modes = ["DEV_MODE", "ZERO", "MVT_L", "MVT_R", "CONST_ERROR_L", "CONST_ERROR_R", "MAIN_GAME"]
 
         def send_quit():
             if self.save_change:
@@ -40,6 +40,18 @@ class remote:
         def toggle_save_change():
             self.save_change = save_on_change_checkbox.value
 
+        def open_mvt():
+            mvt_input.show()
+
+        def close_mvt():
+            mvt_input.hide()
+
+        def open_demo():
+            demographic_input.show()
+
+        def close_demo():
+            demographic_input.hide()
+
         def send_demographics():
             demographic_info = {
                 "age": age_entry.value,
@@ -55,12 +67,63 @@ class remote:
             conn.send(("DEMO",demographic_info))
 
         def send_mvt():
-            return
+            data = (float(mvtL_entry.value), float(mvtR_entry.value))
+            conn.send(("MVT", data))
+
+        def send_error_perc():
+            conn.send(("ERRORPERC", float(target_perc_entry.value)))
+
+        def get_connection_data():
+            while conn.poll():
+                try:
+                    msg = conn.recv()
+                except EOFError:
+                    send_quit()
+
+                if msg[0] == "MVT":
+                    if not mvt_input.visible:
+                        mvtL_entry.value = msg[1]
+                        mvtR_entry.value = msg[2]
+                    else:
+                        if str(msg[1]) not in mvtL_text.value:
+                            mvtL_text.value = "MVT_L" + str(msg[1])
+                        if str(msg[2]) not in mvtR_text.value: 
+                            mvtR_text.value = "MVT_R" + str(msg[2])
+               
+                elif msg[0] == "TARGET_MVT":
+                    if str(msg[1]) not in mvt_target_force_text.value and mvt_target_force_text.visible:
+                        mvt_target_force_text.value = "Target MVT: " + str(msg[1])
+                
+                elif msg[0] == "CONTINUE":
+                    if msg[1]: #If the current mode is to continue
+                        t = "Pause"
+                    else:
+                        t = "Continue"
+
+                    if toggle_button.text != t:
+                        toggle_button.text = t
+
+
+        def send_target_mvt():
+            data = float(mvt_target_force_entry.value)
+            conn.send(("TARGET_MVT", data))
+
+        def send_match():
+            conn.send(("MATCH"))
+
+        # CONTINUE
+        # PAUSE
+        def toggle_automation():
+            if toggle_button.text == "Continue":
+                conn.send(("CONTINUE", True))
+            else:
+                conn.send(("CONTINUE", False))
 
         app = App(title="Torque Game Admin Control", layout="grid")
         upper_box = Box(app, layout="grid", grid=[0, 0], border=True, width="fill")
 
         result = Text(upper_box, text="Default selection", grid=[1, 0], align="top")
+        # Schedule a command to listen to data
 
         combo = Combo(upper_box, options=program_modes, command=mode_select_command_parser, grid=[1, 1], align="top")
 
@@ -73,46 +136,78 @@ class remote:
 
         quit_button = PushButton(upper_box, command=send_quit, text="Quit", grid=[2, 2], align="right")
 
-        lower_box = Box(app, layout="grid", grid=[0, 1],border=True, width="fill", align="left")
-        age_text = Text(lower_box, text="Age", grid=[0,0])
-        age_entry = TextBox(lower_box, text="Age", grid=[1,0])
+        open_mvt_button = PushButton(upper_box, command=open_mvt, text="Enter MVT", grid=[2,3], align="right")
 
-        id_text = Text(lower_box, text="Id", grid=[0, 1])
-        id_entry = TextBox(lower_box, text="Id", grid=[1, 1])
+        open_demo_button = PushButton(upper_box, command=open_demo, text="Enter Demographics", grid=[2,4], align="right")
 
-        gender_text = Text(lower_box, text="Gender", grid=[0, 2])
-        gender_entry = TextBox(lower_box, text="Gender", grid=[1, 2])
+        toggle_button = PushButton(upper_box, command=toggle_automation, text="Pause", grid=[0,4])
 
-        subject_type_text = Text(lower_box, text="subject type", grid=[0, 3])
-        subject_type_entry = TextBox(lower_box, text="subject type", grid=[1, 3])
 
-        diabetes_text = Text(lower_box, text="diabetes", grid=[0, 4])
-        diabetes_entry = TextBox(lower_box, text="diabetes", grid=[1, 4])
+        """
+        Secondary control box
+        """
+        lower_box = Box(app, layout="grid", grid=[0, 1], border=True, width="fill")
+        target_perc_text = Text(lower_box, text="Target Const. Error Percentage", grid=[0, 0])
+        target_perc_entry = TextBox(lower_box, text=".25", grid=[1,0])
+        enter_target_perc = PushButton(lower_box, command=send_error_perc, text="Enter", grid=[2,0])
 
-        dom_arm_text = Text(lower_box, text="dominant arm", grid=[0, 5])
-        dom_arm_entry = TextBox(lower_box, text="dominant arm", grid=[1, 5])
+        match_button = PushButton(lower_box, command=send_match, text="Match", grid=[2,1])
 
-        arm_len_text = Text(lower_box, text="arm length", grid=[0, 6])
-        arm_len_entry = TextBox(lower_box, text="arm length", grid=[1, 6])
 
-        z_offset_text = Text(lower_box, text="arm length", grid=[0, 7])
-        z_offset_entry = TextBox(lower_box, text="arm length", grid=[1, 7])
+        """
+        Demographic inputs
+        """
+        demographic_input = Window(app, layout="grid", title="Demographic Inputs", visible=False)
 
-        stroke_distance_text = Text(lower_box, text="years from stroke", grid=[0, 8])
-        stroke_distance_entry = TextBox(lower_box, text="years from stroke", grid=[1, 8])
+        age_text = Text(demographic_input, text="Age", grid=[0,0])
+        age_entry = TextBox(demographic_input, text="Age", grid=[1,0])
 
-        send_demographics_button = PushButton(lower_box, command=send_demographics, text="send_demographics", grid=[0, 9])
+        id_text = Text(demographic_input, text="Id", grid=[0, 1])
+        id_entry = TextBox(demographic_input, text="Id", grid=[1, 1])
 
-        right_box = Box(app, layout="grid", grid=[1, 1],border=True, align="left")
-        head = Text(right_box, text="Manually set MVT values. \nProgram will default to collected values \nnot be reflected by this value", height=3, grid=[0,0])
+        gender_text = Text(demographic_input, text="Gender", grid=[0, 2])
+        gender_entry = TextBox(demographic_input, text="Gender", grid=[1, 2])
 
-        mvtL_text = Text(right_box, text="MVT L", grid=[0, 1])
-        mvtL_entry = TextBox(right_box, text="1", grid=[1, 1])
+        subject_type_text = Text(demographic_input, text="subject type", grid=[0, 3])
+        subject_type_entry = TextBox(demographic_input, text="subject type", grid=[1, 3])
 
-        mvtR_text = Text(right_box, text="MVT R", grid=[0, 2])
-        mvtR_entry = TextBox(right_box, text="1", grid=[1, 2])
+        diabetes_text = Text(demographic_input, text="diabetes", grid=[0, 4])
+        diabetes_entry = TextBox(demographic_input, text="diabetes", grid=[1, 4])
 
-        send_demographics_button = PushButton(right_box, command=send_mvt, text="send", grid=[0, 3])
+        dom_arm_text = Text(demographic_input, text="dominant arm", grid=[0, 5])
+        dom_arm_entry = TextBox(demographic_input, text="dominant arm", grid=[1, 5])
+
+        arm_len_text = Text(demographic_input, text="arm length", grid=[0, 6])
+        arm_len_entry = TextBox(demographic_input, text="arm length", grid=[1, 6])
+
+        z_offset_text = Text(demographic_input, text="arm length", grid=[0, 7])
+        z_offset_entry = TextBox(demographic_input, text="arm length", grid=[1, 7])
+
+        stroke_distance_text = Text(demographic_input, text="years from stroke", grid=[0, 8])
+        stroke_distance_entry = TextBox(demographic_input, text="years from stroke", grid=[1, 8])
+
+        send_demographics_button = PushButton(demographic_input, command=send_demographics, text="send_demographics", grid=[0, 9])
+
+        """
+        MVT window
+        """
+        mvt_input = Window(app, layout="grid", title="MVT_Window", visible=False)
+        
+        head = Text(mvt_input, text="Manually set MVT values.\nCurrent value is in left collumn", height=3, grid=[0,0])
+
+        mvtL_text = Text(mvt_input, text="MVT L", grid=[0, 1])
+        mvtL_entry = TextBox(mvt_input, text="1", grid=[1, 1])
+
+        mvtR_text = Text(mvt_input, text="MVT R", grid=[0, 2])
+        mvtR_entry = TextBox(mvt_input, text="1", grid=[1, 2])
+
+        send_mvt_inputs_button = PushButton(mvt_input, command=send_mvt, text="send", grid=[0, 3])
+
+        mvt_target_force_text = Text(mvt_input, text="Target MVT Force", grid=[3, 1])
+        mvt_target_force_entry = TextBox(mvt_input, text="1", grid=[3,2]) 
+        enter_mvt_target_force = PushButton(mvt_input, command=send_target_mvt, text="Enter", grid=[3,3])
+
+        result.repeat(10, get_connection_data)
 
         app.display()
 

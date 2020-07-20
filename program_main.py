@@ -3,19 +3,18 @@ from multiprocessing.connection import Listener
 from data_saver import data_saver
 from mvt_viewer import mvt_viewer
 from clear_screen import clearer
-from main_game import game
-from bar_test import bar_test
+from new_game import game
 from zeroer import zeroer
 from constant_error_test import error_test
+from bar_game import bar_game
 
 import pygame
-# from pygame.locals import *
 
 import time
 from time import strftime, localtime
 
 
-program_modes = ["DEV_MODE", "ZERO", "MVT_L", "MVT_R", "CONST_ERROR_L", "CONST_ERROR_R", "BAR_TEST", "MAIN_GAME"]
+program_modes = ["DEV_MODE", "ZERO", "MVT_L", "MVT_R", "CONST_ERROR_L", "CONST_ERROR_R", "MAIN_GAME"]
 
 
 def zeroed(data):
@@ -69,9 +68,9 @@ def handler_mvt_R():
 
 
 def handler_const_error_l():
-    global program_mode, const_error_test, saved_MVT_L, saved_MVT_R
+    global program_mode, const_error_test, saved_MVT_L, saved_MVT_R, const_error_target_perc
 
-    return_val = const_error_test.process_data(zeroed_last_data[0], saved_MVT_L, .25, zeroed_last_data[1], saved_MVT_R)
+    return_val = const_error_test.process_data(zeroed_last_data[0], saved_MVT_L, const_error_target_perc, zeroed_last_data[1], saved_MVT_R)
 
     if return_val == "False": program_mode = "EXIT"
 
@@ -81,9 +80,9 @@ def handler_const_error_l():
 
 
 def handler_const_error_r():
-    global program_mode, const_error_test, saved_MVT_L, saved_MVT_R
+    global program_mode, const_error_test, saved_MVT_L, saved_MVT_R, const_error_target_perc
 
-    return_val = const_error_test.process_data(zeroed_last_data[1], saved_MVT_R, .25, zeroed_last_data[0], saved_MVT_L)
+    return_val = const_error_test.process_data(zeroed_last_data[1], saved_MVT_R, const_error_target_perc, zeroed_last_data[0], saved_MVT_L)
 
     if return_val == "False": program_mode = "EXIT"
 
@@ -93,14 +92,22 @@ def handler_const_error_r():
 
 
 def handler_main_game():
-    global program_mode, main_game, zeroed_last_data
-    return_val = main_game.update_tick(zeroed_last_data[0], zeroed_last_data[1])
+    # global program_mode, main_game, zeroed_last_data
+    # return_val = main_game.update_tick(zeroed_last_data[0], zeroed_last_data[1])
 
-    if return_val == False: program_mode = "EXIT"
+    # if return_val == False: program_mode = "EXIT"
 
-def handler_bar_test():
+    # global program_mode, main_game, zeroed_last_data, saved_MVT_L, saved_MVT_R
+    # return_val = main_game.update_tick(zeroed_last_data[0], saved_MVT_L, zeroed_last_data[1], saved_MVT_R)
+
+    # if return_val == "False": program_mode = "EXIT"
+
+    # elif "SAVE" in return_val:
+    #     saver.save_data(program_mode)
+    #     saver.clear() 
+
     global program_mode, main_game, zeroed_last_data
-    return_val = bar_test.process_data(zeroed_last_data[0], zeroed_last_data[1], saved_MVT_L, saved_MVT_R)
+    return_val = main_game.process_data(zeroed_last_data[0], zeroed_last_data[1], saved_MVT_L, saved_MVT_R)
 
     if return_val == False: program_mode = "EXIT"
 
@@ -131,7 +138,8 @@ def main_handler():
     Essentially just takes in the data, saves it, then routes the data to
     visualization system is determined by the program_mode
     """
-    global last_data, zeroed_last_data, remote_conn, data_conn, program_start_time, program_mode, saved_MVT_L, saved_MVT_R, demographic_info
+    # i really, need to refactor this to stop using the global vars
+    global last_data, test_data, mvt, zeroed_last_data, remote_conn, data_conn, program_start_time, program_mode, saved_MVT_L, saved_MVT_R, demographic_info, const_error_target_perc
 
     # Parse commands first, to make sure that we're always in the proper program_state
     while remote_conn.poll():
@@ -162,6 +170,7 @@ def main_handler():
                 saver.add_data(header)
 
             elif msg[1] == "START":
+                program_state[0] = "WAITING"
                 if "MVT" in program_mode:
                     mvt.begin_automation()
 
@@ -170,10 +179,25 @@ def main_handler():
 
                 elif "CONST_ERROR" in program_mode:
                     const_error_test.begin_automation()
+                
+                elif "MAIN_GAME" in program_mode:
+                    main_game.begin_automation()
 
         elif msg[0] == "DEMO":
             demographic_info = msg[1].copy()
 
+        elif msg[0] == "MVT":
+            saved_MVT_L, saved_MVT_R = msg[1]
+
+        elif msg[0] == "TARGET_MVT":
+            mvt.scale_max = msg[1]
+
+        elif msg[0] == "ERRORPERC":
+            const_error_target_perc = msg[1]
+
+        elif msg[0] == "CONTINUE":
+            test_data['continue'] = msg[1]
+            print(test_data['continue'])
 
     # Parse data commands (There may be many, but loop through and save all of them to ensure that we don't lose any)
     while data_conn.poll():
@@ -201,6 +225,15 @@ def main_handler():
 
             saver.add_data(save_str)
 
+
+    # Send the mvt data repeatedly
+    try:
+        remote_conn.send(("MVT", saved_MVT_L, saved_MVT_R))
+        remote_conn.send(("TARGET_MVT", mvt.scale_max))
+        remote_conn.send(("CONTINUE", test_data['continue']))
+    except EOFError:
+        handler_exit()
+
     # Run methods conditionally based on the mode, calling the above handlers
     # ["DEV_MODE", "ZERO", "MVT_L", "MVT_R", "CONST_ERROR_L", "CONST_ERROR_R", "MAIN_GAME"]
     switcher = {
@@ -211,7 +244,6 @@ def main_handler():
         "CONST_ERROR_L":handler_const_error_l,
         "CONST_ERROR_R":handler_const_error_r,
         "MAIN_GAME":    handler_main_game,
-        "BAR_TEST":     handler_bar_test,
         "EXIT":         handler_exit
     }
 
@@ -228,7 +260,7 @@ if __name__ == '__main__':
     # Socket ports. Ensure that these values are consistent with values in data streaming areas
     remote_port, data_port = 6006, 6007
 
-    # Using a list so that i can give a ref to it. TODO: Change this comment
+    # Using a list so that I can give a ref to it
     program_state = ["DEV_MODE"]
 
     """
@@ -260,8 +292,6 @@ if __name__ == '__main__':
     """
         Initialize pygame and the other visual programs
     """
-    # pygame.mixer.pre_init(44100, 16, 2, 4096)
-
     pygame.init()
     if pygame.mixer and not pygame.mixer.get_init():
         print('Warning, no sound')
@@ -295,17 +325,24 @@ if __name__ == '__main__':
     mvt = mvt_viewer(screen, audio_cues, program_state)
     mvt.scale_max = 1.0
 
-    # Create clearer object, that just serves to create a blank screen. This is
-    # needed, as pygame gets into problems if you don't give it update commands
-    # frequently enough
+    test_data = {
+        "test_number": 0,
+        "number_of_tests": 100,
+        "continue": False
+    }
+
+    """
+    Create clearer object, that just serves to create a blank screen. This is
+    needed, as pygame gets into problems if you don't give it update commands
+    frequently enough
+    """
     clearer = clearer(screen)
 
-    main_game = game(screen, 19, program_state)
-    # These should be set again once automation is setup for the game
-    game.max_force = 1
-    game.min_force = 0
+    # main_game = game(screen, audio_cues, 19, program_state)
+    # # These should be set again once automation is setup for the game
+    # game.max_force, game.min_force = 1, 0
 
-    bar_test = bar_test(screen, audio_cues, program_state)
+    main_game = bar_game(screen, test_data, audio_cues, program_state)
 
     const_error_test = error_test(screen, audio_cues, program_state, 30)
 
@@ -316,6 +353,8 @@ if __name__ == '__main__':
 
     # Array containing the zero matrix
     zero_data = [0, 0]
+
+    const_error_target_perc = .25
 
     # Global variable to store last data as a buffer, in case there's an issue
     # or a break in the data collection
