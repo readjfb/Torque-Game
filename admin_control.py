@@ -103,6 +103,21 @@ class remote:
                     if toggle_button.text != t:
                         toggle_button.text = t
 
+                elif msg[0] == "TRIALDATA":
+                    t = "Pause" if msg[1] else "Continue"
+                    #If the current mode is to continue
+
+                    if toggle_button.text != t:
+                        toggle_button.text = t
+
+                    if str(msg[2]) != trial_num_c_text.value:
+                        trial_num_c_text.value = str(msg[2])
+
+                    if str(msg[3]) != total_trial_num_c_text.value:
+                        total_trial_num_c_text.value = str(msg[3])
+
+
+
 
         def send_target_mvt():
             data = float(mvt_target_force_entry.value)
@@ -110,6 +125,9 @@ class remote:
 
         def send_match():
             conn.send(("MATCH"))
+
+        def send_trial_num():
+            conn.send(("TRIALNUM", float(trial_num_entry.value), float(total_trial_num_entry.value)))
 
         # CONTINUE
         # PAUSE
@@ -140,19 +158,35 @@ class remote:
 
         open_demo_button = PushButton(upper_box, command=open_demo, text="Enter Demographics", grid=[2,4], align="right")
 
-        toggle_button = PushButton(upper_box, command=toggle_automation, text="Pause", grid=[0,4])
+        
 
 
         """
         Secondary control box
         """
-        lower_box = Box(app, layout="grid", grid=[0, 1], border=True, width="fill")
-        target_perc_text = Text(lower_box, text="Target Const. Error Percentage", grid=[0, 0])
-        target_perc_entry = TextBox(lower_box, text=".25", grid=[1,0])
-        enter_target_perc = PushButton(lower_box, command=send_error_perc, text="Enter", grid=[2,0])
+        mid_box = Box(app, layout="grid", grid=[0, 1], border=True, width="fill")
+        target_perc_text = Text(mid_box, text="Target Const. Error Percentage", grid=[0, 0])
+        target_perc_entry = TextBox(mid_box, text=".25", grid=[1,0])
+        enter_target_perc = PushButton(mid_box, command=send_error_perc, text="Enter", grid=[2,0])
 
-        match_button = PushButton(lower_box, command=send_match, text="Match", grid=[2,1])
+        match_button = PushButton(mid_box, command=send_match, text="Match", grid=[2,1])
 
+
+        """
+        Bottom automation control box
+        """
+        automation_box = Box(app, layout="grid", grid=[0, 2], border=True, width="fill")
+        trial_num_s_text = Text(automation_box, text="Test #", grid=[0, 0])
+        trial_num_c_text = Text(automation_box, text="0", grid=[1, 0])
+        trial_num_entry = TextBox(automation_box, text="0", grid=[2, 0])
+        trial_num_enter = PushButton(automation_box, text="Set Trial #s", command=send_trial_num, grid=[3, 0])
+
+
+        total_trial_num_s_text = Text(automation_box, text="Test #", grid=[0, 1])
+        total_trial_num_c_text = Text(automation_box, text="100", grid=[1, 1])
+        total_trial_num_entry = TextBox(automation_box, text="100", grid=[2, 1])
+
+        toggle_button = PushButton(automation_box, command=toggle_automation, text="Pause", grid=[3, 1])
 
         """
         Demographic inputs
