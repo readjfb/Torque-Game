@@ -97,11 +97,14 @@ class remote:
                 elif msg[0] == "CONTINUE":
                     if msg[1]: #If the current mode is to continue
                         t = "Pause"
+                        color = (0,255,0)
                     else:
                         t = "Continue"
+                        color = (255, 0, 0)
 
                     if toggle_button.text != t:
                         toggle_button.text = t
+                        toggle_button.bg = color
 
                 elif msg[0] == "TRIALDATA":
                     t = "Pause" if msg[1] else "Continue"
@@ -117,14 +120,12 @@ class remote:
                         total_trial_num_c_text.value = str(msg[3])
 
 
-
-
         def send_target_mvt():
             data = float(mvt_target_force_entry.value)
             conn.send(("TARGET_MVT", data))
 
         def send_match():
-            conn.send(("MATCH"))
+            conn.send(("MATCH", ""))
 
         def send_trial_num():
             conn.send(("TRIALNUM", float(trial_num_entry.value), float(total_trial_num_entry.value)))
@@ -158,9 +159,7 @@ class remote:
 
         open_demo_button = PushButton(upper_box, command=open_demo, text="Enter Demographics", grid=[2,4], align="right")
 
-        
-
-
+    
         """
         Secondary control box
         """

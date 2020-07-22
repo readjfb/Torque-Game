@@ -138,12 +138,11 @@ def main_handler():
     visualization system is determined by the program_mode
     """
     # i really, need to refactor this to stop using the global vars
-    global last_data, test_data, mvt, zeroed_last_data, remote_conn, data_conn, program_start_time, program_mode, saved_MVT_L, saved_MVT_R, demographic_info, const_error_target_perc
+    global last_data, test_data, mvt, zeroed_last_data, remote_conn, data_conn, program_start_time, program_mode, saved_MVT_L, saved_MVT_R, demographic_info, const_error_target_perc, const_error_test
 
     # Parse commands first, to make sure that we're always in the proper program_state
     while remote_conn.poll():
         msg = remote_conn.recv()
-        # print(msg)
         if msg[0] == "EXIT":
             handler_exit()
 
@@ -196,11 +195,13 @@ def main_handler():
 
         elif msg[0] == "CONTINUE":
             test_data['continue'] = msg[1]
-            print(test_data['continue'])
 
         elif msg[0] == "TRIALNUM":
             test_data['test_number'] = msg[1]
             test_data['number_of_tests'] = msg[2]
+
+        elif msg[0] == "MATCH":
+            const_error_test.match = True
 
     # Parse data commands (There may be many, but loop through and save all of them to ensure that we don't lose any)
     while data_conn.poll():
