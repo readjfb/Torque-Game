@@ -58,7 +58,7 @@ class streamer(object):
             try:
                 time.sleep(t-time.perf_counter())
             except:
-                warnings.warn('System may not be able to handle such high frame rate, lower the desired frequency or simplify your callback fucntion')
+                warnings.warn('System may not be able to handle such high frame rate, lower the desired frequency or simplify your callback function')
                 continue
 
     def ni_stream(self, callback, daq_name, channels=["Dev1/ai0","Dev1/ai1"], stream_rate=1000):

@@ -16,6 +16,8 @@ class error_test:
 
         self.state = state
 
+        self.match = False
+
         '''
             "DEFAULT" - Display blank screen with a static circle
 
@@ -94,11 +96,13 @@ class error_test:
                 self.internal_mode = "ERROR_TEST_2"
                 self.refrence_time = time.time()
                 self.audio_cues['match forces'].play()
+                self.match = False
 
             self.one_circle_target(ref_force, ref_max_force, target_perc)
 
         elif self.internal_mode == "ERROR_TEST_2":
-            if time.time()-self.refrence_time > time_2:
+            if time.time()-self.refrence_time > time_2 or self.match == True:
+                self.match = False
                 self.internal_mode = "ERROR_TEST_3"
                 self.refrence_time = time.time()
 
@@ -121,9 +125,6 @@ class error_test:
         target_perc_2 = force_2 / max_force_2
 
         error = target_perc_1 - target_perc_2
-
-        # if self.internal_mode != "DEFAULT":
-        #     print(target_perc_1, target_perc_2, error)
 
         if time.time() - self.prev_time > self.frame_time:
             return self.process_mode(ref_force, ref_max_force, target_perc)

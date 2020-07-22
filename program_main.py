@@ -138,12 +138,11 @@ def main_handler():
     visualization system is determined by the program_mode
     """
     # i really, need to refactor this to stop using the global vars
-    global last_data, test_data, mvt, zeroed_last_data, remote_conn, data_conn, program_start_time, program_mode, saved_MVT_L, saved_MVT_R, demographic_info, const_error_target_perc
+    global last_data, test_data, mvt, zeroed_last_data, remote_conn, data_conn, program_start_time, program_mode, saved_MVT_L, saved_MVT_R, demographic_info, const_error_target_perc, const_error_test
 
     # Parse commands first, to make sure that we're always in the proper program_state
     while remote_conn.poll():
         msg = remote_conn.recv()
-        # print(msg)
         if msg[0] == "EXIT":
             handler_exit()
 
@@ -161,7 +160,7 @@ def main_handler():
                 saver.save_data(program_mode)
             elif msg[1] == "CLEAR":
                 saver.clear()
-                header = "raw_torqueL, raw_torqueR, zeroed_torqueL, zeroed_torqueR, MVT_L, MVT_R, Time, program_state, "
+                header = "trial_num, total_num_trials, raw_torqueL, raw_torqueR, zeroed_torqueL, zeroed_torqueR, MVT_L, MVT_R, Time, program_state, "
 
                 keys = demographic_info.keys()
                 header += ", ".join(keys)
@@ -196,7 +195,13 @@ def main_handler():
 
         elif msg[0] == "CONTINUE":
             test_data['continue'] = msg[1]
-            print(test_data['continue'])
+
+        elif msg[0] == "TRIALNUM":
+            test_data['test_number'] = msg[1]
+            test_data['number_of_tests'] = msg[2]
+
+        elif msg[0] == "MATCH":
+            const_error_test.match = True
 
     # Parse data commands (There may be many, but loop through and save all of them to ensure that we don't lose any)
     while data_conn.poll():
@@ -204,14 +209,15 @@ def main_handler():
         if msg[0] == "DATA":
             msg = msg[1]
             # Data comes in as TorqueL, TorqueR, Time
-            # Save as raw_torqueL, raw_torqueR, zeroed_torqueL, zeroed_torqueR, MVT_L, MVT_R, Time, then the various demographic info
+            # Save as trial_num, total_num_trials, raw_torqueL, raw_torqueR, zeroed_torqueL, zeroed_torqueR, MVT_L, MVT_R, Time, program_state,  then the various demographic info
             if msg[0] == None or msg[1] == None:
                 continue
 
             last_data = [float(msg[0]), float(msg[1])]
             zeroed_last_data = zeroed(last_data)
 
-            save_str =  f"{last_data[0]}, {last_data[1]}, "
+            save_str =  f"{test_data['test_number']}, {test_data['number_of_tests']}, "
+            save_str += f"{last_data[0]}, {last_data[1]}, "
             save_str += f"{zeroed_last_data[0]}, {zeroed_last_data[1]}, "
             save_str += f"{saved_MVT_L}, {saved_MVT_R}, "
             save_str += f"{float(msg[2]) - program_start_time}, "
@@ -230,6 +236,7 @@ def main_handler():
         remote_conn.send(("MVT", saved_MVT_L, saved_MVT_R))
         remote_conn.send(("TARGET_MVT", mvt.scale_max))
         remote_conn.send(("CONTINUE", test_data['continue']))
+        remote_conn.send(("TRIALDATA", test_data['continue'], test_data['test_number'], test_data['number_of_tests']))
     except EOFError:
         handler_exit()
 
@@ -336,10 +343,6 @@ if __name__ == '__main__':
     frequently enough
     """
     clearer = clearer(screen)
-
-    # main_game = game(screen, audio_cues, 19, program_state)
-    # # These should be set again once automation is setup for the game
-    # game.max_force, game.min_force = 1, 0
 
     main_game = bar_game(screen, test_data, audio_cues, program_state)
 
