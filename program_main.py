@@ -21,6 +21,15 @@ def zeroed(data):
 
     return [data[0]-zero_data[0], data[1]-zero_data[1]]
 
+def add_header():
+    global demographic_info, saver
+
+    header = "trial_num, total_num_trials, raw_torqueL, raw_torqueR, zeroed_torqueL, zeroed_torqueR, MVT_L, MVT_R, Time, program_state, "
+
+    keys = demographic_info.keys()
+    header += ", ".join(keys)
+
+    saver.add_data(header)
 
 # Handler methods control what happens each 'tick' in each separate mode
 def handler_exit():
@@ -50,6 +59,7 @@ def handler_mvt_L():
 
         saver.save_data(program_mode)
         saver.clear()
+        add_header()
 
 
 def handler_mvt_R():
@@ -64,6 +74,7 @@ def handler_mvt_R():
 
         saver.save_data(program_mode)
         saver.clear()
+        add_header()
 
 
 def handler_const_error_l():
@@ -76,6 +87,7 @@ def handler_const_error_l():
     if return_val == "SAVE": 
         saver.save_data(program_mode)
         saver.clear()
+        add_header()
 
 
 def handler_const_error_r():
@@ -88,27 +100,19 @@ def handler_const_error_r():
     if return_val == "SAVE":
         saver.save_data(program_mode)
         saver.clear()
+        add_header()
 
 
 def handler_main_game():
-    # global program_mode, main_game, zeroed_last_data
-    # return_val = main_game.update_tick(zeroed_last_data[0], zeroed_last_data[1])
-
-    # if return_val == False: program_mode = "EXIT"
-
-    # global program_mode, main_game, zeroed_last_data, saved_MVT_L, saved_MVT_R
-    # return_val = main_game.update_tick(zeroed_last_data[0], saved_MVT_L, zeroed_last_data[1], saved_MVT_R)
-
-    # if return_val == "False": program_mode = "EXIT"
-
-    # elif "SAVE" in return_val:
-    #     saver.save_data(program_mode)
-    #     saver.clear() 
-
     global program_mode, main_game, zeroed_last_data
     return_val = main_game.process_data(zeroed_last_data[0], zeroed_last_data[1], saved_MVT_L, saved_MVT_R)
 
-    if return_val == False: program_mode = "EXIT"
+    if return_val == "False": program_mode = "EXIT"
+
+    elif "SAVE" in return_val:
+        saver.save_data(program_mode)
+        saver.clear()
+        add_header()
 
 
 def handler_zero():
@@ -124,6 +128,7 @@ def handler_zero():
         print("zeroed, b=", zero_data)
         saver.save_data(program_mode)
         saver.clear()
+        add_header()
 
 
 def main_handler():
@@ -160,12 +165,7 @@ def main_handler():
                 saver.save_data(program_mode)
             elif msg[1] == "CLEAR":
                 saver.clear()
-                header = "trial_num, total_num_trials, raw_torqueL, raw_torqueR, zeroed_torqueL, zeroed_torqueR, MVT_L, MVT_R, Time, program_state, "
-
-                keys = demographic_info.keys()
-                header += ", ".join(keys)
-
-                saver.add_data(header)
+                add_header()
 
             elif msg[1] == "START":
                 program_state[0] = "WAITING"

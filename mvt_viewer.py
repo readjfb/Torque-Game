@@ -106,7 +106,7 @@ class mvt_viewer(object):
         return self.height - temp
 
     def mode_process(self):
-        time_0, time_1 = 2, 6
+        time_0, time_1 = 2, 5
 
         default = "DISPLAY_MVT"
 
