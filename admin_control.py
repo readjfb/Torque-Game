@@ -1,5 +1,9 @@
-# This works in python 3.6.3
-# It must be started
+'''
+    This is a very basic tKinter GUI created with GUIZero. In the future, this should probably be recreated with a more
+    'established' gui framework, such as raw tkinter or else. I just used GUIZero because it's quick and (very) easy
+
+    It runs in a standalone thread, and communicates to 'program_main.py' via a socket.
+'''
 
 from multiprocessing.connection import Client
 from guizero import App, Window, Text, Combo, PushButton, CheckBox, Box, TextBox

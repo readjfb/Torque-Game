@@ -42,7 +42,7 @@ While the data saving at 1KhZ is consistent +- 1 sample/second, the fps in the v
 - [X] Add automated system for MVT Viewer
 - [X] Add audio cues for MVT  
 - [ ] ~~Add audio cues for main_game~~
-- [ ] ~~Add automated system for main_game~~
+- [X] ~~Add automated system for main_game~~
 - [X] Add schematic of Arduino layout to folder
 - [X] Create prototype constant error match test system
 - [X] Prototype stage 4
