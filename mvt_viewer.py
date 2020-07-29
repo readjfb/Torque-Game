@@ -218,7 +218,15 @@ class mvt_viewer(object):
         that results in the adjusting of the height. Will be added to internal buffer for eventual
         MVT calculation
         """
-        self.cache.append(data)
+        
+        # If there are adiquate data points, begin a scrolling average
+        if len(self.cache) > 250:
+            avg_value = sum(self.cache[-249:]) + data
+            avg_value /= 250
+            self.cache.append(avg_value)
+        else:
+            self.cache.append(data)
+
         self.running = continue_run
 
         if time.time() - self.prev_time > self.frame_time:
