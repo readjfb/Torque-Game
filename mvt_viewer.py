@@ -2,23 +2,6 @@ import pygame
 import time
 
 
-class rectangle(object):
-    def __init__(self, l_x, r_x, height, thickness, window_height=600):
-        self.l_x = l_x
-
-        self.r_x = r_x
-
-        self.height = height
-        self.window_height = window_height
-        self.thickness = thickness
-
-    def draw(self, surface, color=(255, 0, 0)):
-        pygame.draw.polygon(surface, color, [(self.l_x, self.height),
-                                             (self.r_x, self.height),
-                                             (self.r_x, self.height + self.thickness),
-                                             (self.l_x, self.height + self.thickness)])
-
-
 class mvt_viewer(object):
     def __init__(self, surface, audio_cues, state, scale_min=None, scale_max=None, fps=25):
         """
@@ -38,7 +21,6 @@ class mvt_viewer(object):
 
         self.cache = []
 
-        self.rectangle = None
 
         self.prev_time = time.time()
         self.frame_time = 1.0/fps
@@ -56,7 +38,6 @@ class mvt_viewer(object):
         self.running = True
 
         eighth = self.width // 8
-        self.rectangle = rectangle(eighth, self.width - eighth, 20, 50, self.height)
 
         self.screen = surface
 
@@ -97,15 +78,16 @@ class mvt_viewer(object):
     def transform(self, value):
         """
         Internal method
-        Does the range mapping to generate the actual y cordinate of the rectangle
+        Does the range mapping to generate the radius of the circle
 
-        :param value: The raw datapoint to be mapped into a y coordinate
+        :param value: The raw datapoint to be mapped into a radius
         :return: the transformed value
         """
-        temp = self.height * (value / (self.scale_max-self.scale_min))
-        return self.height - temp
+        temp = abs(self.width * (value / (self.scale_max-self.scale_min))) / 2
+        temp = max(temp, 6)
+        return int(temp)
 
-    def mode_process(self):
+    def mode_process(self, rad):
         time_0, time_1 = 2, 5
 
         default = "DISPLAY_MVT"
@@ -136,7 +118,7 @@ class mvt_viewer(object):
             return self.blank_screen
 
         elif self.internal_mode == "DISPLAY_MVT":
-            return self.one_step((200, 200, 200))
+            return self.one_step(rad, (200, 200, 200))
 
         elif self.internal_mode == "DISPLAY_MVT_0":
             if time.time() - self.refrence_time > time_0:
@@ -144,20 +126,20 @@ class mvt_viewer(object):
                 self.refrence_time = time.time()
                 self.audio_cues['pull hard'].play()
 
-            return self.one_step()
+            return self.one_step(rad)
 
         elif self.internal_mode == "DISPLAY_MVT_1":
             if time.time() - self.refrence_time > time_1:
                 self.refrence_time = time.time()
                 self.internal_mode = "DISPLAY_MVT_2"
 
-            return self.one_step()
+            return self.one_step(rad)
 
         elif self.internal_mode == "DISPLAY_MVT_2":
             # TODO: Logic for waiting until stabilitzation
             self.refrence_time = time.time()
             self.internal_mode = "DISPLAY_MVT_3"
-            return self.one_step()
+            return self.one_step(rad)
 
         elif self.internal_mode == "DISPLAY_MVT_3":
             self.audio_cues['relax'].play()
@@ -166,7 +148,7 @@ class mvt_viewer(object):
             return (f"SAVE,{self.get_max_value()}")
 
         else:
-            return self.one_step()
+            return self.one_step(rad)
 
     def begin_automation(self):
         """
@@ -179,7 +161,7 @@ class mvt_viewer(object):
         self.internal_mode = "DISPLAY_MVT_0"
         self.audio_cues['starting'].play()
 
-    def one_step(self, color=(255, 0, 0)):
+    def one_step(self, rad, color=(255, 0, 0)):
         """
         Does one drawing step for pygame
         Also handles pygame events; returns False if the pygame window should be exited
@@ -193,7 +175,9 @@ class mvt_viewer(object):
 
         self.screen.fill((255,255,255))
 
-        self.rectangle.draw(self.screen, color)
+        center = (self.width//2, self.height//2)
+
+        pygame.draw.circle(self.screen, color, center, rad, 6)
 
         pygame.display.update()
         return str(self.running)
@@ -211,7 +195,7 @@ class mvt_viewer(object):
         """
         the step that does it all
         Takes in a single datapoint, adds it to it's internal cache
-        If its internal FPS counter indicates so, it sets the rectangle's height,
+        If its internal FPS counter indicates so, it sets the circle,
         and processes a new frame
 
         :param data: Single numerical datapoint to be correlated with the scale_min/ scale_max
@@ -230,11 +214,9 @@ class mvt_viewer(object):
         self.running = continue_run
 
         if time.time() - self.prev_time > self.frame_time:
-            self.rectangle.height = self.transform(data)
-
             self.prev_time = time.time()
 
-            return self.mode_process()
+            return self.mode_process(self.transform(data))
         else:
             return "True"
 
