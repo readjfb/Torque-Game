@@ -17,6 +17,7 @@ class streamer(object):
         """
         Doesn't really do anything right now
         """
+        
         return
 
     def arduino_stream(self, callback, stream_rate=1000, usb_port='/dev/cu.usbserial-DA011ECL'):

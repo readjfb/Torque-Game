@@ -264,7 +264,7 @@ def main_handler():
 
 if __name__ == '__main__':
     # Socket ports. Ensure that these values are consistent with values in data streaming areas
-    remote_port, data_port = 6006, 6007
+    remote_port, data_port, plotter_port = 6006, 6007, 6008
 
     # Using a list so that I can give a ref to it
     program_state = ["DEV_MODE"]
@@ -279,10 +279,16 @@ if __name__ == '__main__':
     print("Established remote")
 
     print("Waiting for data stream")
-    address = ('localhost', data_port)
-    listener_1 = Listener(address)
+    address1 = ('localhost', data_port)
+    listener_1 = Listener(address1)
     data_conn = listener_1.accept()
     print("connected to data stream")
+
+    # print("Waiting for real time plotter")
+    # address2 = ('localhost', plotter_port)
+    # listener_2 = Listener(address2)
+    # plotter_conn = listener_2.accept()
+    # print("Connected to plotter")
 
     """
         Create data saver object
