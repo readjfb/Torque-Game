@@ -100,6 +100,7 @@ class zeroer:
                 self.sound_effects["end zero"].play()
                 self.internal_mode = "ZERO"
 
+                # ZERO_1 is the end stage, so it returns the average
                 mean_l = sum([x[0] for x in self.saved_values])
                 mean_r = sum([x[1] for x in self.saved_values])
 
