@@ -14,18 +14,6 @@ class data_saver(object):
         self.data_cache = []
         self.save_dir = os.getcwd() + "/tests/" + save_directory
 
-        file_paths = ["/zeros", "/MVT_L", "/MVT_R", "/game_testing", "/const_error_test_l", "/const_error_test_r"]
-
-        file_paths = [self.save_dir+path for path in file_paths]
-
-        for path in file_paths:
-            try:
-                os.makedirs(path)
-            except OSError:
-                print ("Creation of the directory %s failed" % path)
-            else:
-                print ("Successfully created the directory %s" % path)
-
         self.state = state
 
     def add_data(self, line):
@@ -54,19 +42,16 @@ class data_saver(object):
 
         :return: returns nothing
         """
+        
+        path = f"{self.save_dir}/{mode}/"
 
-        if mode == "MVT_L":
-            path = self.save_dir + "/MVT_L/"
-        elif mode == "MVT_R":
-            path = self.save_dir + "/MVT_R/"
-        elif mode == "MAIN_GAME":
-            path = self.save_dir + "/game_testing/"
-        elif mode == "CONST_ERROR_L":
-            path = self.save_dir + "/const_error_test_l/"
-        elif mode == "CONST_ERROR_R":
-            path = self.save_dir + "/const_error_test_r/"
+        try:
+            os.makedirs(path)
+        except OSError:
+            # print ("Creation of the directory %s failed" % path)
+            pass
         else:
-            path = self.save_dir + "/zeros/"
+            print ("Successfully created the directory %s" % path)
 
         i = 0
         while os.path.exists(f"{path}{mode}_data{i}.csv"):

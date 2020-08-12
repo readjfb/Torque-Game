@@ -14,7 +14,7 @@ class remote:
         # Stores if a save signal should be sent when program mode is changed
         self.save_change = False
 
-        program_modes = ["DEV_MODE", "ZERO", "MVT_L", "MVT_R", "CONST_ERROR_L", "CONST_ERROR_R", "MAIN_GAME"]
+        program_modes = ["DEV_MODE", "ZERO", "MVT_L", "MVT_R", "baseline_error_L", "baseline_error_R", "MAIN_GAME"]
 
         def send_quit():
             if self.save_change:
@@ -168,7 +168,7 @@ class remote:
         Secondary control box
         """
         mid_box = Box(app, layout="grid", grid=[0, 1], border=True, width="fill")
-        target_perc_text = Text(mid_box, text="Target Const. Error Percentage", grid=[0, 0])
+        target_perc_text = Text(mid_box, text="Target Baseliine Error Percentage", grid=[0, 0])
         target_perc_entry = TextBox(mid_box, text=".25", grid=[1,0])
         enter_target_perc = PushButton(mid_box, command=send_error_perc, text="Enter", grid=[2,0])
 

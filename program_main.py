@@ -4,7 +4,7 @@ from data_saver import data_saver
 from mvt_viewer import mvt_viewer
 from clear_screen import clearer
 from zeroer import zeroer
-from constant_error_test import error_test
+from baseline_error_test import error_test
 from bar_game import bar_game
 
 import pygame
@@ -13,7 +13,7 @@ import time
 from time import strftime, localtime
 
 
-program_modes = ["DEV_MODE", "ZERO", "MVT_L", "MVT_R", "CONST_ERROR_L", "CONST_ERROR_R", "MAIN_GAME"]
+program_modes = ["DEV_MODE", "ZERO", "MVT_L", "MVT_R", "baseline_error_L", "baseline_error_R", "MAIN_GAME"]
 
 
 def zeroed(data):
@@ -77,10 +77,10 @@ def handler_mvt_R():
         add_header()
 
 
-def handler_const_error_l():
-    global program_mode, const_error_test, saved_MVT_L, saved_MVT_R, const_error_target_perc
+def handler_baseline_error_l():
+    global program_mode, baseline_error_test, saved_MVT_L, saved_MVT_R, baseline_error_target_perc
 
-    return_val = const_error_test.process_data(zeroed_last_data[0], saved_MVT_L, const_error_target_perc, zeroed_last_data[1], saved_MVT_R)
+    return_val = baseline_error_test.process_data(zeroed_last_data[0], saved_MVT_L, baseline_error_target_perc, zeroed_last_data[1], saved_MVT_R)
 
     if return_val == "False": program_mode = "EXIT"
 
@@ -90,10 +90,10 @@ def handler_const_error_l():
         add_header()
 
 
-def handler_const_error_r():
-    global program_mode, const_error_test, saved_MVT_L, saved_MVT_R, const_error_target_perc
+def handler_baseline_error_r():
+    global program_mode, baseline_error_test, saved_MVT_L, saved_MVT_R, baseline_error_target_perc
 
-    return_val = const_error_test.process_data(zeroed_last_data[1], saved_MVT_R, const_error_target_perc, zeroed_last_data[0], saved_MVT_L)
+    return_val = baseline_error_test.process_data(zeroed_last_data[1], saved_MVT_R, baseline_error_target_perc, zeroed_last_data[0], saved_MVT_L)
 
     if return_val == "False": program_mode = "EXIT"
 
@@ -143,7 +143,7 @@ def main_handler():
     visualization system is determined by the program_mode
     """
     # i really, need to refactor this to stop using the global vars
-    global last_data, test_data, mvt, zeroed_last_data, remote_conn, data_conn, program_start_time, program_mode, saved_MVT_L, saved_MVT_R, demographic_info, const_error_target_perc, const_error_test
+    global last_data, test_data, mvt, zeroed_last_data, remote_conn, data_conn, program_start_time, program_mode, saved_MVT_L, saved_MVT_R, demographic_info, baseline_error_target_perc, baseline_error_test
 
     # Parse commands first, to make sure that we're always in the proper program_state
     while remote_conn.poll():
@@ -175,8 +175,8 @@ def main_handler():
                 elif "ZERO" in program_mode:
                     zeroer.begin_zeroing()
 
-                elif "CONST_ERROR" in program_mode:
-                    const_error_test.begin_automation()
+                elif "baseline_error" in program_mode:
+                    baseline_error_test.begin_automation()
                 
                 elif "MAIN_GAME" in program_mode:
                     main_game.begin_automation()
@@ -191,7 +191,7 @@ def main_handler():
             mvt.scale_max = msg[1]
 
         elif msg[0] == "ERRORPERC":
-            const_error_target_perc = msg[1]
+            baseline_error_target_perc = msg[1]
 
         elif msg[0] == "CONTINUE":
             test_data['continue'] = msg[1]
@@ -201,7 +201,7 @@ def main_handler():
             test_data['number_of_tests'] = msg[2]
 
         elif msg[0] == "MATCH":
-            const_error_test.match = True
+            baseline_error_test.match = True
 
     # Parse data commands (There may be many, but loop through and save all of them to ensure that we don't lose any)
     while data_conn.poll():
@@ -241,14 +241,14 @@ def main_handler():
         handler_exit()
 
     # Run methods conditionally based on the mode, calling the above handlers
-    # ["DEV_MODE", "ZERO", "MVT_L", "MVT_R", "CONST_ERROR_L", "CONST_ERROR_R", "MAIN_GAME"]
+    # ["DEV_MODE", "ZERO", "MVT_L", "MVT_R", "baseline_error_L", "baseline_error_R", "MAIN_GAME"]
     switcher = {
         "DEV_MODE":     handler_dev_mode,
         "ZERO":         handler_zero,
         "MVT_L":        handler_mvt_L,
         "MVT_R":        handler_mvt_R,
-        "CONST_ERROR_L":handler_const_error_l,
-        "CONST_ERROR_R":handler_const_error_r,
+        "baseline_error_L":handler_baseline_error_l,
+        "baseline_error_R":handler_baseline_error_r,
         "MAIN_GAME":    handler_main_game,
         "EXIT":         handler_exit
     }
@@ -352,7 +352,7 @@ if __name__ == '__main__':
 
     main_game = bar_game(screen, test_data, audio_cues, program_state)
 
-    const_error_test = error_test(screen, audio_cues, program_state, 30)
+    baseline_error_test = error_test(screen, audio_cues, program_state, 30)
 
     zeroer = zeroer(screen, audio_cues, program_state)
 
@@ -362,7 +362,7 @@ if __name__ == '__main__':
     # Array containing the zero matrix
     zero_data = [0, 0]
 
-    const_error_target_perc = .25
+    baseline_error_target_perc = .25
 
     # Global variable to store last data as a buffer, in case there's an issue
     # or a break in the data collection
