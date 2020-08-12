@@ -1,7 +1,8 @@
 import pygame
 import time
 
-
+# This file was originally called constant_error_test, so any references to constant error test refer
+# to this file
 class error_test:
     def __init__(self, screen, audio_cues, state, fps=30):
         self.screen = screen
@@ -21,14 +22,14 @@ class error_test:
         '''
             "DEFAULT" - Display blank screen with a static circle
 
-            "ERROR_TEST_0": Say "Beginning test", and wait for 2 seconds
+            "ERROR_TEST_BASELINE": Say "Beginning test", and wait for 2 seconds
 
-            "ERROR_TEST_1": Say Pull in; wait until level reaches
+            "ERROR_TEST_PULL": Say Pull in; wait until level reaches
             ~ desired percentage for X seconds
 
-            "ERROR_TEST_2": Say "match", collect data for 6 seconds
+            "ERROR_TEST_MATCHING": Say "match", collect until match signal
 
-            "ERROR_TEST_3": Say "relax",Save data and end
+            "ERROR_TEST_MATCHED": Say "relax",Save data and end
         '''
         self.refrence_time = time.time()
         self.internal_mode = "DEFAULT"
@@ -65,12 +66,12 @@ class error_test:
         pygame.display.update()
 
     def begin_automation(self):
-        self.internal_mode = "ERROR_TEST_0"
+        self.internal_mode = "ERROR_TEST_BASELINE"
         self.refrence_time = time.time()
         self.audio_cues['starting'].play()
 
     def process_mode(self, ref_force, ref_max_force, target_perc):
-        time_0, time_1 = 2, 2
+        time_0, time_1, time_2 = 2, 2, .1
 
         current_perc = ref_force/ref_max_force
 
@@ -79,43 +80,43 @@ class error_test:
         if self.internal_mode == "DEFAULT":
             self.display_clear()
 
-        elif self.internal_mode == "ERROR_TEST_0":
+        elif self.internal_mode == "ERROR_TEST_BASELINE":
             if time.time()-self.refrence_time > time_0 and current_perc < .1:
-                self.internal_mode = "ERROR_TEST_1"
+                self.internal_mode = "ERROR_TEST_PULL"
                 self.refrence_time = time.time()
                 self.audio_cues['pull to line'].play()
 
             self.one_circle_target(ref_force, ref_max_force, target_perc)
 
-        elif self.internal_mode == "ERROR_TEST_1":
+        elif self.internal_mode == "ERROR_TEST_PULL":
             # Wait until we get to the right height and a bit of
             # time has elapsed
             if abs(current_perc - target_perc) < .05 and time.time()-self.refrence_time > time_1:
                 # We're in a good zone
                 # TODO: Do checking to make sure we stay here for a bit
-                self.internal_mode = "ERROR_TEST_2"
+                self.internal_mode = "ERROR_TEST_MATCHING"
                 self.refrence_time = time.time()
                 self.audio_cues['match forces'].play()
                 self.match = False
 
             self.one_circle_target(ref_force, ref_max_force, target_perc)
 
-        elif self.internal_mode == "ERROR_TEST_2":
+        elif self.internal_mode == "ERROR_TEST_MATCHING":
             if self.match == True:
                 self.match = False
-                self.internal_mode = "ERROR_TEST_3"
+                self.internal_mode = "ERROR_TEST_MATCHED"
                 self.refrence_time = time.time()
+                self.audio_cues['relax'].play()
 
             self.one_circle_target(ref_force, ref_max_force, target_perc)
 
-        elif self.internal_mode == "ERROR_TEST_3":
-            self.audio_cues['relax'].play()
+        elif self.internal_mode == "ERROR_TEST_MATCHED":
+            if time.time() - self.refrence_time > time_2:
+                self.internal_mode = "DEFAULT"
 
-            self.internal_mode = "DEFAULT"
-
-            # TBD: Do we want to return something(s) to be saved?
-            return "SAVE"
-
+                # TBD: Do we want to return something(s) to be saved?
+                return "SAVE"
+                        
     def process_data(self, ref_force, ref_max_force, target_perc, force_2, max_force_2):
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
@@ -133,33 +134,3 @@ class error_test:
 
         return "True"
 
-    # def display_circles(self, f_1, max_f_1, f_2, max_f_2):
-    #     self.screen.fill(self.bg_color)
-
-    #     center = (self.width//2, self.height//2)
-
-    #     h = self.height // 2
-
-    #     rad_1 = max(int((f_1/max_f_1) * h), 5)
-    #     rad_2 = max(int((f_2/max_f_2) * h), 5)
-
-    #     pygame.draw.circle(self.screen, (255, 0, 0), center, rad_1, 5)
-
-    #     pygame.draw.circle(self.screen, (0, 0, 255), center, rad_2, 5)
-
-    #     pygame.display.update()
-
-    # def process_data_debug(self, f_1, max_f_1, f_2, max_f_2, hide=False):
-    #     for event in pygame.event.get():
-    #         if event.type == pygame.QUIT:
-    #             return "False"
-
-    #     if time.time() - self.prev_time > self.frame_time:
-    #         if hide:
-    #             self.display_clear()
-    #         else:
-    #             self.display_circles(f_1, max_f_1, f_2, max_f_2)
-
-    #         self.prev_time = time.time()
-
-    #     return "True"
