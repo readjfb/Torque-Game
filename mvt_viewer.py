@@ -21,6 +21,8 @@ class mvt_viewer(object):
 
         self.cache = []
 
+        # The MVT match circle is 80% the width of the screen
+        self.match_circle_perc = .8
 
         self.prev_time = time.time()
         self.frame_time = 1.0/fps
@@ -83,7 +85,7 @@ class mvt_viewer(object):
         :param value: The raw datapoint to be mapped into a radius
         :return: the transformed value
         """
-        temp = abs(self.width * (value / (self.scale_max-self.scale_min))) / 2
+        temp = abs((self.width * self.match_circle_perc) * (value / (self.scale_max-self.scale_min))) / 2
         temp = max(temp, 6)
         return int(temp)
 
@@ -176,6 +178,9 @@ class mvt_viewer(object):
         self.screen.fill((255,255,255))
 
         center = (self.width//2, self.height//2)
+
+        target_circle_rad = int(self.width*self.match_circle_perc*.5)
+        pygame.draw.circle(self.screen, (0,0,0), center, target_circle_rad-5, 10)
 
         pygame.draw.circle(self.screen, color, center, rad, 6)
 

@@ -45,6 +45,7 @@ class bar_game:
 
         theta = math.atan(m_0)
 
+        # Leftx and rightx are the x values of the middle of the sides of the tray
         left_x, right_x = -math.cos(theta) * (self.box_width/2), math.cos(theta) * (self.box_width/2)
 
         left_x += self.width/2
@@ -204,6 +205,8 @@ class bar_game:
 
                 theta = abs(math.atan(self.get_bar_slope(l_torque, r_torque)))
 
+                # Calculated physics value to determine the force with which the block would slide
+                # If it's > 0, it would slide
                 f = m * g * math.sin(theta) - sf * m * g * math.cos(theta)
 
                 print(f"Angle={theta}, f={f}")
@@ -239,7 +242,7 @@ class bar_game:
                     if self.test_data["test_number"] < self.test_data["number_of_tests"]:
                         self.internal_mode = "MAIN_GAME:START"
                         self.test_data["test_number"] += 1
-                        print("LOOP")
+                        # print("LOOP")
                     else:
                         self.internal_mode = "MAIN_GAME:DEFAULT"
 

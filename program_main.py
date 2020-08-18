@@ -6,6 +6,7 @@ from clear_screen import clearer
 from zeroer import zeroer
 from baseline_error_test import error_test
 from bar_game import bar_game
+from plotter import plotter
 
 import pygame
 
@@ -148,6 +149,7 @@ def main_handler():
     # Parse commands first, to make sure that we're always in the proper program_state
     while remote_conn.poll():
         msg = remote_conn.recv()
+
         if msg[0] == "EXIT":
             handler_exit()
 
@@ -163,6 +165,7 @@ def main_handler():
                     saved_MVT_R = mvt.get_max_value()
 
                 saver.save_data(program_mode)
+                
             elif msg[1] == "CLEAR":
                 saver.clear()
                 add_header()
