@@ -6,6 +6,7 @@ from clear_screen import clearer
 from zeroer import zeroer
 from baseline_error_test import error_test
 from bar_game import bar_game
+from plotter import plotter
 
 import pygame
 
