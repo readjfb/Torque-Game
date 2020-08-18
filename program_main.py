@@ -148,6 +148,7 @@ def main_handler():
     # Parse commands first, to make sure that we're always in the proper program_state
     while remote_conn.poll():
         msg = remote_conn.recv()
+
         if msg[0] == "EXIT":
             handler_exit()
 
@@ -163,6 +164,7 @@ def main_handler():
                     saved_MVT_R = mvt.get_max_value()
 
                 saver.save_data(program_mode)
+                
             elif msg[1] == "CLEAR":
                 saver.clear()
                 add_header()

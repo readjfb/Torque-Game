@@ -46,7 +46,7 @@ While the data saving at 1KhZ is consistent +- 1 sample/second, the fps in the v
 - [X] Add schematic of Arduino layout to folder
 - [X] Create prototype constant error match test system
 - [X] Prototype stage 4
-- [X] **Add GUI system for manually setting MVT percentage in constant_error_tests**
+- [X] Add GUI system for manually setting MVT percentage in constant_error_tests
 - [X] Add MVT Ring
 - [ ] Add inner and outer rings for baseline error test
 - [ ] Update audio cues across the board

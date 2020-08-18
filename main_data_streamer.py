@@ -19,6 +19,7 @@ sending multiple types of message
 def cast_data(data):
     try:
         conn.send(("DATA", data))
+        # conn.send(("DATA", (leftT, rightT, time)))
     except BrokenPipeError:
         # Pipe is one way, so there's an error when the main program is
         # terminated, and the pipe is cut. Therefore quit
