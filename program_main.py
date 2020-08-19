@@ -376,6 +376,7 @@ if __name__ == '__main__':
     last_data = [0, 0]
     zeroed_last_data = [0.0, 0.0]
 
+    # Store demographic info in a dictionary for easy retrieval
     demographic_info = {
         "age": 0,
         "id": "NULL",
