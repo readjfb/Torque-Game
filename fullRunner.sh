@@ -10,4 +10,6 @@ sleep 1
 python main_data_streamer.py &
 sleep 1
 
-wait %1 %2 %3
+python plotter.py &
+
+wait %1 %2 %3 %4
