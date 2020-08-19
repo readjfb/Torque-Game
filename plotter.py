@@ -11,7 +11,6 @@ display_num_pts = 2000
 '''
     Establish a socket connection
 '''
-
 address = ('localhost', port_number)
 conn = Client(address)
 print("plotter connection established")
@@ -19,19 +18,20 @@ print("plotter connection established")
 '''
     Create Matplotlib subplots and lineplots
 '''
-
 fig, (ax1, ax2) = plt.subplots(2,1)
-
-times = [0]
-left_datapoints, right_datapoints = [0], [0]
 
 line1, = ax1.plot([0], [0])
 line2, = ax2.plot([0], [0])
 
 ax1.set_xticks([])
 
+# These lists will hold the data. The values in the lists are just random initial values
+times = [0,.1]
+left_datapoints, right_datapoints = [0, .1], [0, .1]
+
+
 '''
-    Cache the limits
+    Cache the limits; done for performance boost
 '''
 ax1_ymin, ax1_ymax = 0, 1
 ax2_ymin, ax2_ymax = 0, 1
@@ -66,6 +66,7 @@ def animate(i, xs, ys1, ys2):
     ax1.set_xlim([xs[0], xs[-1]])  
     ax2.set_xlim([xs[0], xs[-1]])
 
+    # Ensuring that the window doesn't change axis more than is neccesary. Speeds up performance. 
     if min(0, min(ys1)) != ax1_ymin:
         update1 = True
         ax1_ymin = min(0, min(ys1))
@@ -92,5 +93,3 @@ def animate(i, xs, ys1, ys2):
 ani = animation.FuncAnimation(fig, animate, fargs=(times, left_datapoints, right_datapoints), interval=30)
 plt.show()
 conn.close()
-
-
