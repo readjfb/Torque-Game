@@ -6,7 +6,6 @@ from clear_screen import clearer
 from zeroer import zeroer
 from baseline_error_test import error_test
 from bar_game import bar_game
-from plotter import plotter
 
 import pygame
 
@@ -233,6 +232,11 @@ def main_handler():
 
             saver.add_data(save_str)
 
+            try:
+                plotter_conn.send( ((zeroed_last_data[0], zeroed_last_data[1]), msg[2]-program_start_time) )
+            except EOFError:
+                handler_exit()
+
 
     # Send the mvt data repeatedly
     try:
@@ -287,11 +291,11 @@ if __name__ == '__main__':
     data_conn = listener_1.accept()
     print("connected to data stream")
 
-    # print("Waiting for real time plotter")
-    # address2 = ('localhost', plotter_port)
-    # listener_2 = Listener(address2)
-    # plotter_conn = listener_2.accept()
-    # print("Connected to plotter")
+    print("Waiting for real time plotter")
+    address2 = ('localhost', plotter_port)
+    listener_2 = Listener(address2)
+    plotter_conn = listener_2.accept()
+    print("Connected to plotter")
 
     """
         Create data saver object
