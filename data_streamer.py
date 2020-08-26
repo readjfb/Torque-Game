@@ -34,10 +34,15 @@ class streamer(object):
         """
         period = 1.0/stream_rate
 
-        board = pyfirmata.Arduino(usb_port)
-        # board = pyfirmata.Arduino('/dev/ttyACM0')
-        it = pyfirmata.util.Iterator(board)
-        it.start()
+        try:
+            board = pyfirmata.Arduino(usb_port)
+            # board = pyfirmata.Arduino('/dev/ttyACM0')
+            it = pyfirmata.util.Iterator(board)
+            it.start()
+        except:
+            print("Arduino not connected at port", usb_port)
+
+            quit()
 
         analog_input_L = board.get_pin('a:2:i')
         analog_input_R = board.get_pin('a:3:i')

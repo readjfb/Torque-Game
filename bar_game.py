@@ -8,6 +8,19 @@ import time
 
 class bar_game:
     def __init__(self, screen, test_data, sound_cues, state, fps=30):
+        """
+            Create a bar_game object that holds the pygame screen object and other relevant values
+
+            Draws the bar and the 'glass' which is modeled as an ideal cube
+
+            Physics variables can be found in process_mode()
+
+            :param screen: the PyGame.screen object
+            :param test_data: The list being passed by reference from program_main. Holds the current test #, and if the stage should loop
+            :param sound_cues: Dictionary of sounds which hold the pygame sound objects to be played
+            :param state: List passed by reference to set the state to be saved. Is updated whenever this method is running
+            :param fps: Fps to draw to the screen at. Not exact; not to be trusted exactly. 
+        """
         self.screen = screen
         self.sound_cues = sound_cues
         self.test_data = test_data
@@ -35,6 +48,15 @@ class bar_game:
         self.square_x = self.width/2
 
     def get_bar_slope(self, l_val, r_val):
+        """
+            get_bar_slope()
+
+            returns the slope of the bar given the left and right torque values
+
+            :param l_val: torque value of the left side
+            :param r_val: torque value of the right side
+
+        """
         return ((r_val - l_val) * self.height) / self.box_width
 
     def draw_bar(self, l_val, r_val, m_0, color=(2, 2, 2)):
@@ -45,9 +67,10 @@ class bar_game:
 
         theta = math.atan(m_0)
 
-        # Leftx and rightx are the x values of the middle of the sides of the tray
+        # Left_x and right_x are the x values of the middle of the sides of the tray
         left_x, right_x = -math.cos(theta) * (self.box_width/2), math.cos(theta) * (self.box_width/2)
 
+        # Box starts at (0.0), so it gets shifted to the center
         left_x += self.width/2
         right_x += self.width/2
 
@@ -82,9 +105,13 @@ class bar_game:
 
         x_dif, y_dif = (self.square_radius) * math.cos(theta_2), (self.square_radius) * math.sin(theta_2)
 
+        # Create list of points based on the values found via the trig functions.
+        # Centered @ 0,yvalue, to be shifted later
         rect_pts = [(left_x + x_dif, left_y + y_dif), (right_x + x_dif, right_y + y_dif),
                     (right_x - x_dif, right_y - y_dif), (left_x-x_dif, left_y-y_dif)]
 
+        # Rectangle starts centered at 0, yvalue, so shift in the x by X
+         # in the y by the y value - the y value of the center
         y_diff = y - (left_y+right_y)/2
         x_diff = x
 
@@ -115,6 +142,7 @@ class bar_game:
 
         self.screen.fill((255, 255, 255))
 
+        # Find the slope of the bar, to be used when drawing the glass and ball
         m_0 = self.get_bar_slope(l_val, r_val)
 
         self.draw_bar(l_val, r_val, m_0, bar_col)

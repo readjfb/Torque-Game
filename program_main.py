@@ -142,7 +142,7 @@ def main_handler():
     Essentially just takes in the data, saves it, then routes the data to
     visualization system is determined by the program_mode
     """
-    # i really, need to refactor this to stop using the global vars
+    # Should probably be refactored to stop using the global vars
     global last_data, test_data, mvt, zeroed_last_data, remote_conn, data_conn, program_start_time, program_mode, saved_MVT_L, saved_MVT_R, demographic_info, baseline_error_target_perc, baseline_error_test
 
     # Parse commands first, to make sure that we're always in the proper program_state
@@ -232,6 +232,7 @@ def main_handler():
 
             saver.add_data(save_str)
 
+            # Send data to the plotter. This can be rate-limited in the future if increased performatnce is needed
             try:
                 plotter_conn.send( ((zeroed_last_data[0], zeroed_last_data[1]), msg[2]-program_start_time) )
             except EOFError:
@@ -248,7 +249,6 @@ def main_handler():
         handler_exit()
 
     # Run methods conditionally based on the mode, calling the above handlers
-    # ["DEV_MODE", "ZERO", "MVT_L", "MVT_R", "baseline_error_L", "baseline_error_R", "MAIN_GAME"]
     switcher = {
         "DEV_MODE":     handler_dev_mode,
         "ZERO":         handler_zero,
@@ -273,7 +273,7 @@ if __name__ == '__main__':
     # Socket ports. Ensure that these values are consistent with values in data streaming areas
     remote_port, data_port, plotter_port = 6006, 6007, 6008
 
-    # Using a list so that I can give a ref to it
+    # Using a list so that I can give a refrence to it
     program_state = ["DEV_MODE"]
 
     """
