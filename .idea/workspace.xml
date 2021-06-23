@@ -20,7 +20,36 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="3e8890cc-867f-4187-bc22-83ed7ee7b8b8" name="Default Changelist" comment="">
+      <change beforePath="$PROJECT_DIR$/.gitignore" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/README.md" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/admin_control.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/arduino_layout/basic_idea.png" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/bar_game.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/baseline_error_test.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/clear_screen.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/data_saver.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/data_streamer.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/data_visualizers/error_visuals.py" beforeDir="false" />
       <change beforePath="$PROJECT_DIR$/data_visualizers/time_testing/7:13:20TimeDelta.png" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/data_visualizers/time_testing/time_between_points1.png" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/data_visualizers/time_testing/time_data_distribution2.png" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/data_visualizers/time_testing/time_diff_checker.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/data_visualizers/time_testing/time_dist_normal.png" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/environment/environment.yml" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/fullRunner.sh" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/main_data_streamer.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/mvt_viewer.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/plotter.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/program_main.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/sound_effects/beginningCalibration.wav" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/sound_effects/endCalibration.wav" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/sound_effects/matchForces.wav" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/sound_effects/outofrange.wav" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/sound_effects/pullLine.wav" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/sound_effects/pullhard.wav" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/sound_effects/relax.wav" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/sound_effects/starttest.wav" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/zeroer.py" beforeDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />

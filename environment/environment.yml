@@ -4,20 +4,16 @@ channels:
 dependencies:
   - ca-certificates=2020.1.1=0
   - certifi=2020.4.5.2=py36_0
-  - libcxx=10.0.0=1
-  - libedit=3.1.20191231=haf1e3a3_0
-  - libffi=3.2.1=h0a44026_6
-  - ncurses=6.2=h0a44026_1
-  - openssl=1.0.2u=h1de35cc_0
+  - libffi=3.2.1
+  - openssl=1.0.2u
   - pip=20.1.1=py36_1
-  - python=3.6.3=h47c878a_7
-  - readline=7.0=h1de35cc_5
+  - python=3.6.3
   - setuptools=47.3.0=py36_0
-  - sqlite=3.32.2=hffcf06c_0
-  - tk=8.6.10=hb0a8c7a_0
+  - sqlite=3.32.2
+  - tk=8.6.10
   - wheel=0.34.2=py36_0
-  - xz=5.2.5=h1de35cc_0
-  - zlib=1.2.11=h1de35cc_3
+  - xz=5.2.5
+  - zlib=1.2.11
   - pip:
     - cffi==1.14.0
     - cycler==0.10.0

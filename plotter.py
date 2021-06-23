@@ -4,7 +4,7 @@ import matplotlib.animation as animation
 import time
 from multiprocessing.connection import Client
 
-port_number = 6008
+port_number = 6010
 display_num_pts = 2000
 
 
