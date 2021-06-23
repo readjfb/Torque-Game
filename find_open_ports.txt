@@ -1,0 +1,5 @@
+find port:
+netstat -ano | findstr :<PORT>
+
+open port:
+taskkill /PID <PID> /F

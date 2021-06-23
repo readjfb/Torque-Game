@@ -19,8 +19,8 @@ class streamer(object):
         """
         
         return
-
-    def arduino_stream(self, callback, stream_rate=1000, usb_port='/dev/cu.usbserial-DA011ECL'):
+    #def arduino_stream(self, callback, stream_rate=1000, usb_port='/dev/cu.usbserial-DA011ECL'):
+    def arduino_stream(self, callback, stream_rate=1000, usb_port='COM5'):
         """
         Connects to the arduino at usb port usb_port, then streams at stream rate samples / second
 

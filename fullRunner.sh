@@ -1,5 +1,6 @@
 #!/bin/bash
-source activate torqueenv
+source /c/Users/zarif_vfgx7yn/miniconda3/etc/profile.d/conda.sh
+conda activate torqueenv
 
 python program_main.py &
 sleep 1

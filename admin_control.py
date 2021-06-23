@@ -186,8 +186,8 @@ class remote:
 
 
         total_trial_num_s_text = Text(automation_box, text="Test #", grid=[0, 1])
-        total_trial_num_c_text = Text(automation_box, text="100", grid=[1, 1])
-        total_trial_num_entry = TextBox(automation_box, text="100", grid=[2, 1])
+        total_trial_num_c_text = Text(automation_box, text="0", grid=[1, 1])
+        total_trial_num_entry = TextBox(automation_box, text="0", grid=[2, 1])
 
         toggle_button = PushButton(automation_box, command=toggle_automation, text="Pause", grid=[3, 1])
 

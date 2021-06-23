@@ -27,7 +27,7 @@ def cast_data(data):
 
 
 if __name__ == '__main__':
-    port = 6007
+    port = 6008
     address = ('localhost', port)
     conn = Client(address)
 
@@ -36,7 +36,8 @@ if __name__ == '__main__':
     print("sending data")
 
     # uncomment the type of stream desired
-    stream.arduino_stream(cast_data, 1000, usb_port='/dev/cu.usbserial-DA011ECL')
-    # stream.fake_stream(cast_data, 1000)
+    #stream.arduino_stream(cast_data, 1000, usb_port='/dev/cu.usbserial-DA011ECL')
+    stream.arduino_stream(cast_data, 4000, usb_port='COM5')
+    #stream.fake_stream(cast_data, 4000)
 
     conn.close()

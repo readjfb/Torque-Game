@@ -46,13 +46,15 @@ def handler_dev_mode():
 
     if return_val == False: program_mode = "EXIT"
 
-
+# max of 5
+cur_reps = 0
+max_reps = 2
 def handler_mvt_L():
-    global mvt, program_mode, zeroed_last_data, saved_MVT_L
+    global mvt, program_mode, zeroed_last_data, saved_MVT_L, max_reps, cur_reps
     return_val = mvt.process_data(zeroed_last_data[0])
 
     if return_val == "EXIT": program_mode = "EXIT"
-
+    # make it automatic based on number of trials
     if "SAVE" in return_val:
         return_val = return_val.split(",")
         saved_MVT_L = float(return_val[1])
@@ -60,6 +62,9 @@ def handler_mvt_L():
         saver.save_data(program_mode)
         saver.clear()
         add_header()
+        if cur_reps < max_reps:
+            cur_reps += 1
+            mvt.begin_automation()
 
 
 def handler_mvt_R():
@@ -84,7 +89,7 @@ def handler_baseline_error_l():
 
     if return_val == "False": program_mode = "EXIT"
 
-    if return_val == "SAVE": 
+    if return_val == "SAVE":
         saver.save_data(program_mode)
         saver.clear()
         add_header()
@@ -143,7 +148,7 @@ def main_handler():
     visualization system is determined by the program_mode
     """
     # i really, need to refactor this to stop using the global vars
-    global last_data, test_data, mvt, zeroed_last_data, remote_conn, data_conn, program_start_time, program_mode, saved_MVT_L, saved_MVT_R, demographic_info, baseline_error_target_perc, baseline_error_test
+    global max_reps, last_data, test_data, mvt, zeroed_last_data, remote_conn, data_conn, program_start_time, program_mode, saved_MVT_L, saved_MVT_R, demographic_info, baseline_error_target_perc, baseline_error_test
 
     # Parse commands first, to make sure that we're always in the proper program_state
     while remote_conn.poll():
@@ -179,7 +184,7 @@ def main_handler():
 
                 elif "baseline_error" in program_mode:
                     baseline_error_test.begin_automation()
-                
+
                 elif "MAIN_GAME" in program_mode:
                     main_game.begin_automation()
 
@@ -271,7 +276,7 @@ def main_handler():
 
 if __name__ == '__main__':
     # Socket ports. Ensure that these values are consistent with values in data streaming areas
-    remote_port, data_port, plotter_port = 6006, 6007, 6008
+    remote_port, data_port, plotter_port = 6006, 6008, 6010
 
     # Using a list so that I can give a ref to it
     program_state = ["DEV_MODE"]
@@ -346,7 +351,7 @@ if __name__ == '__main__':
 
     test_data = {
         "test_number": 0,
-        "number_of_tests": 100,
+        "number_of_tests": 0,
         "continue": False
     }
 
