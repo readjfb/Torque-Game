@@ -6,6 +6,7 @@ from clear_screen import clearer
 from zeroer import zeroer
 from baseline_error_test import error_test
 from bar_game import bar_game
+from explicit_training import error_training
 
 import pygame
 
@@ -13,7 +14,8 @@ import time
 from time import strftime, localtime
 
 
-program_modes = ["DEV_MODE", "ZERO", "MVT_L", "MVT_R", "baseline_error_L", "baseline_error_R", "MAIN_GAME"]
+program_modes = ["DEV_MODE", "ZERO", "MVT_L", "MVT_R", "baseline_error_L",
+                 "baseline_error_R", "MAIN_GAME", "explicit_training"]
 
 
 def zeroed(data):
@@ -102,6 +104,20 @@ def handler_baseline_error_r():
         saver.clear()
         add_header()
 
+def handler_explicit_training():
+    global program_mode, explicit_training, saved_MVT_L, saved_MVT_R, baseline_error_target_perc
+
+    return_val = explicit_training.process_data(zeroed_last_data[0], saved_MVT_L, baseline_error_target_perc,
+                                                  zeroed_last_data[1], saved_MVT_R)
+
+    if return_val == "False": program_mode = "EXIT"
+
+    if return_val == "SAVE":
+        saver.save_data(program_mode)
+        saver.clear()
+        add_header()
+
+
 
 def handler_main_game():
     global program_mode, main_game, zeroed_last_data
@@ -143,7 +159,9 @@ def main_handler():
     visualization system is determined by the program_mode
     """
     # i really, need to refactor this to stop using the global vars
-    global last_data, test_data, mvt, zeroed_last_data, remote_conn, data_conn, program_start_time, program_mode, saved_MVT_L, saved_MVT_R, demographic_info, baseline_error_target_perc, baseline_error_test
+    global last_data, test_data, mvt, zeroed_last_data, remote_conn, data_conn, \
+        program_start_time, program_mode, saved_MVT_L, saved_MVT_R, demographic_info, \
+        baseline_error_target_perc, baseline_error_test, explicit_training
 
     # Parse commands first, to make sure that we're always in the proper program_state
     while remote_conn.poll():
@@ -183,6 +201,9 @@ def main_handler():
                 elif "MAIN_GAME" in program_mode:
                     main_game.begin_automation()
 
+                elif "explicit_training" in program_mode:
+                    explicit_training.begin_automation()
+
         elif msg[0] == "DEMO":
             demographic_info = msg[1].copy()
 
@@ -204,6 +225,7 @@ def main_handler():
 
         elif msg[0] == "MATCH":
             baseline_error_test.match = True
+            explicit_training.match = True
 
     # Parse data commands (There may be many, but loop through and save all of them to ensure that we don't lose any)
     while data_conn.poll():
@@ -257,6 +279,7 @@ def main_handler():
         "baseline_error_L":handler_baseline_error_l,
         "baseline_error_R":handler_baseline_error_r,
         "MAIN_GAME":    handler_main_game,
+        "explicit_training":    handler_explicit_training,
         "EXIT":         handler_exit
     }
 
@@ -363,6 +386,8 @@ if __name__ == '__main__':
 
     zeroer = zeroer(screen, audio_cues, program_state)
 
+    explicit_training = error_training(screen, audio_cues, program_state, 30)
+
     # global variables to store data during the test
     saved_MVT_L, saved_MVT_R = 1.0, 1.0
 
@@ -392,3 +417,4 @@ if __name__ == '__main__':
     # Forever loop that gets forcefully exited out of via the handler_exit
     while True:
         main_handler()
+
