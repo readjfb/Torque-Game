@@ -1,0 +1,180 @@
+import pygame
+import time
+
+
+# Configured so that the left arm is the reference arm, and the right arm is the matching arm
+class error_training:
+    def __init__(self, screen, audio_cues, state, fps=30):
+        self.screen = screen
+        self.audio_cues = audio_cues
+
+        self.width, self.height = screen.get_size()
+
+        self.bg_color = (255, 255, 255)
+
+        self.frame_time = 1.0 / fps
+        self.prev_time = time.time()
+
+        self.state = state
+
+        self.match = False
+
+        '''
+            "DEFAULT" - Display blank screen with a static circle
+            
+            "ERROR_TEST_PULL": Say Pull in; wait until level reaches
+            ~ desired percentage for X seconds
+
+            "ERROR_TEST_MATCHING": Say "match", collect until match signal
+
+            "ERROR_TEST_MATCHED": Say "relax",
+            
+            Generate graphic
+            
+            Reset for new trial
+            
+            Save and exit during the last trial
+        '''
+        self.refrence_time = time.time()
+        self.internal_mode = "DEFAULT"
+        self.in_zone = False
+
+    def display_clear(self):
+        # Display the default screen with a circle on it
+        self.screen.fill(self.bg_color)
+
+        center = (self.width // 2, self.height // 2)
+
+        static_radius = self.width // 3
+
+        pygame.draw.circle(self.screen, (0, 0, 204), center, static_radius, 12)
+
+        pygame.display.update()
+
+    def one_circle_target(self, force, max_force, target_perc):
+        self.screen.fill(self.bg_color)
+
+        center = (self.width // 2, self.height // 2)
+
+        static_radius = self.width // 3
+
+        pygame.draw.circle(self.screen, (0, 0, 204), center, static_radius, 12)
+
+        # added by polina: upper and lower error bars (+/- 5%)
+        upper_err_perc = 0.05
+        lower_err_perc = 0.05
+        upper_err_rad = static_radius * ((target_perc + upper_err_perc) / target_perc)
+        lower_err_rad = static_radius * ((target_perc - lower_err_perc) / target_perc)
+
+        pygame.draw.circle(self.screen, (0, 204, 255), center, int(upper_err_rad), 3)
+        pygame.draw.circle(self.screen, (0, 204, 255), center, int(lower_err_rad), 3)
+
+        target_value = max_force * target_perc
+
+        variable_rad = (force / target_value) * static_radius
+        variable_rad = max(int(variable_rad), 6)
+
+        if (variable_rad < upper_err_rad) and (variable_rad > lower_err_rad):
+            pygame.draw.circle(self.screen, (0, 255, 0), center, variable_rad, 6)
+        else:
+            pygame.draw.circle(self.screen, (255, 0, 0), center, variable_rad, 6)
+
+        pygame.display.update()
+
+    def visualize_error(self, ref_force, match_force):
+        self.screen.fill(self.bg_color)
+
+        center = (self.width // 2, self.height // 2)
+
+        static_ref_radius = self.width // 3
+        match_radius = int(static_ref_radius * (match_force / ref_force))
+
+        pygame.draw.circle(self.screen, (0, 204, 0), center, static_ref_radius, 8)
+        if (match_radius > 6):
+            pygame.draw.circle(self.screen, (204, 0, 0), center, match_radius, 6)
+        else:
+            print("Match torque is too small")
+
+
+        pygame.display.update()
+
+    def begin_automation(self):
+        self.internal_mode = "ERROR_TEST_BASELINE"
+        self.refrence_time = time.time()
+        self.audio_cues['starting'].play()
+
+    def process_mode(self, ref_force, ref_max_force, target_perc, match_force):
+        time_0, time_1, time_2, time_3 = 2, 2, .1, 5
+        # changed time_3 from 15 seconds to 5
+        current_perc = ref_force / ref_max_force
+
+        self.state[0] = self.internal_mode
+
+        if self.internal_mode == "DEFAULT":
+            self.display_clear()
+
+        elif self.internal_mode == "ERROR_TEST_BASELINE":
+            if time.time() - self.refrence_time > time_0 and current_perc < .1:
+                self.internal_mode = "ERROR_TEST_PULL"
+                self.refrence_time = time.time()
+                self.audio_cues['pull to line'].play()
+
+            self.one_circle_target(ref_force, ref_max_force, target_perc)
+
+        elif self.internal_mode == "ERROR_TEST_PULL":
+            # Wait until we get to the right height and a bit of
+            # time has elapsed
+            if abs(current_perc - target_perc) < .05 and time.time() - self.refrence_time > time_3:
+                # We're in a good zone
+                # TODO: Do checking to make sure we stay here for a bit
+                self.internal_mode = "ERROR_TEST_MATCHING"
+                self.refrence_time = time.time()
+                self.match = False
+                self.audio_cues['match forces'].play()
+
+            self.one_circle_target(ref_force, ref_max_force, target_perc)
+
+        elif self.internal_mode == "ERROR_TEST_MATCHING":
+            if (self.match == True):
+                self.match = False
+                self.internal_mode = "ERROR_TEST_MATCHED"
+                self.refrence_time = time.time()
+
+            # added
+            self.one_circle_target(ref_force, ref_max_force, target_perc)
+
+        elif self.internal_mode == "ERROR_TEST_MATCHED":
+            if time.time() - self.refrence_time > time_2:
+                self.visualize_error(ref_force, match_force)
+                self.internal_mode = "ERROR_TEST_VISUALIZED"
+                self.audio_cues['relax'].play()
+
+        elif self.internal_mode == "ERROR_TEST_VISUALIZED":
+            if time.time() - self.refrence_time > time_3:
+                self.internal_mode = "DEFAULT"
+
+                # TBD: Do we want to return something(s) to be saved?
+                #return "SAVE"
+
+# TODO: Relaxation animation
+# TODO: Trial reset?
+# TODO: Exception thrown when match torque = 0?
+# TODO: Other concerns: match force may not be stable enough -- need to calculate based on average instead?
+
+    def process_data(self, ref_force, ref_max_force, target_perc, force_2, max_force_2):
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                return "False"
+
+        target_perc_1 = ref_force / ref_max_force
+        target_perc_2 = force_2 / max_force_2
+
+        error = target_perc_1 - target_perc_2
+
+        if time.time() - self.prev_time > self.frame_time:
+            return self.process_mode(ref_force, ref_max_force, target_perc, force_2)
+
+            self.prev_time = time.time()
+
+        return "True"
+
